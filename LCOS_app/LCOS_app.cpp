@@ -157,12 +157,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                     SendData->dwData = (intptr_t)0;
                     SendData->cbData = (UINT)13;
-                    SendData->lpData = (PVOID)TEXT("RPS1/9/100000");
+                    SendData->lpData = (PVOID)"RPS1/9/-1000";
                     SendMessage(hWnd, WM_COPYDATA, ReceveData, (LPARAM)SendData);
 
                     if (SendMessage != 0) {
-                        //wprintf(szBuff, "%s", SendMessage);
-                        MessageBox(hWnd, TEXT("Success Sending message "), TEXT("Chamonixからの返答"), MB_OK);
+                        wprintf(szBuff, "%s", ReceveData);
+                        MessageBox(hWnd, szBuff, TEXT("Chamonixからの返答"), MB_OK);
                     }
                     else {
                         MessageBox(hWnd, TEXT("False Sending message"), TEXT("Chamonixからの返答"), MB_OK);
