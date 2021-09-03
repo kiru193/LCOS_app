@@ -131,6 +131,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
     HDC hdc;
     static HWND hSend,hStop;
+    
+    COPYDATASTRUCT *SendData = new COPYDATASTRUCT();
+    WPARAM ReceveData = 0;
+    WCHAR szBuff[1024];
 
     switch (message)
     {
@@ -148,14 +152,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case ID_SEND:
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd == 0) {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
-                else {
+                if (hWnd != 0) {
                     MessageBox(hWnd, TEXT("Chamonixが開かれています"), TEXT("成功"), MB_OK);
 
-                }
+                    SendData->dwData = (intptr_t)0;
+                    SendData->cbData = (UINT)13;
+                    SendData->lpData = (PVOID)TEXT("RPS1/9/100000");
+                    SendMessage(hWnd, WM_COPYDATA, ReceveData, (LPARAM)SendData);
 
+                    if (SendMessage != 0) {
+                        //wprintf(szBuff, "%s", SendMessage);
+                        MessageBox(hWnd, TEXT("Success Sending message "), TEXT("Chamonixからの返答"), MB_OK);
+                    }
+                    else {
+                        MessageBox(hWnd, TEXT("False Sending message"), TEXT("Chamonixからの返答"), MB_OK);
+                    }
+                }
+                else {
+                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+                }
                 break;
             case ID_STOP:
                 break;
