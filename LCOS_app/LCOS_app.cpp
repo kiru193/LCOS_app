@@ -9,7 +9,7 @@
 
 #define MAX_LOADSTRING 100
 #define WINDOW_WIDE 400
-#define WINDOW_HIGH 220  
+#define WINDOW_HIGH 160
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -146,6 +146,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
+            case ID_SEND:
+                hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                if (hWnd == 0) {
+                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+                }
+                else {
+                    MessageBox(hWnd, TEXT("Chamonixが開かれています"), TEXT("成功"), MB_OK);
+
+                }
+
+                break;
+            case ID_STOP:
+                break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -153,7 +166,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_CREATE:
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("SEND"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
-        hStop = CreateWindow(TEXT("BUTTON"), TEXT("STOP"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
+        hStop = CreateWindow(TEXT("BUTTON"), TEXT("STOP"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_STOP, hInst, NULL);
         break;
     case WM_PAINT:
         {
