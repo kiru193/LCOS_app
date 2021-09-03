@@ -5,10 +5,11 @@
 #include "LCOS_app.h"
 
 #define ID_SEND 100
+#define ID_STOP 101
 
 #define MAX_LOADSTRING 100
 #define WINDOW_WIDE 400
-#define WINDOW_HIGH 110  
+#define WINDOW_HIGH 220  
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -129,7 +130,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend;
+    static HWND hSend,hStop;
 
     switch (message)
     {
@@ -152,6 +153,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_CREATE:
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("SEND"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
+        hStop = CreateWindow(TEXT("BUTTON"), TEXT("STOP"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
         break;
     case WM_PAINT:
         {
