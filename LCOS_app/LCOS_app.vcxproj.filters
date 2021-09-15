@@ -45,5 +45,8 @@
     <Image Include="LCOS_app.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="char.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
 </Project>
