@@ -292,9 +292,9 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_CREATE:
-        //デバイスコンテキストhdc_menにビットマップリソース「SAMPLE」を読み込む
+        //デバイスコンテキストhdc_menにビットマップリソース画像を読み込む
         hdc = GetDC(hWnd);
-        hBmp = LoadBitmap(hInst, TEXT("SAMPLE"));
+        hBmp = LoadBitmap(hInst, TEXT("CHECKER"));
         hdc_men1 = CreateCompatibleDC(hdc);
         SelectObject(hdc_men1, hBmp);
         GetObject(hBmp, (int)sizeof(BITMAP), &bmp_info);//bitmap画像の取得

@@ -48,5 +48,8 @@
     <Image Include="char.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="checker.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
 </Project>
