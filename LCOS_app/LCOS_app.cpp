@@ -4,12 +4,11 @@
 #include "framework.h"
 #include "LCOS_app.h"
 
-#define ID_SEND 100
-#define ID_SHOW 101
+
 
 #define MAX_LOADSTRING 100
 #define WINDOW_WIDE 400
-#define WINDOW_HIGH 160
+#define WINDOW_HIGH 200
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -37,6 +36,9 @@ HDC hdc_men = 0;
 HDC hdc_men1 = 0;
 int w = 0, h = 0;
 int number = 0;
+
+//回転、Xステージへの送信関数
+BOOL Send_Stage_Message(HWND hSSM, WCHAR equipment, WCHAR controll_num, WCHAR move);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -145,8 +147,17 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // グローバル変数にインスタンス ハンドルを格納する
 
-   HWND hWnd = CreateWindowW(szWindowClass, TEXT("操作メニュー"), WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, WINDOW_WIDE, WINDOW_HIGH, nullptr, nullptr, hInstance, nullptr);
+   HWND hWnd = CreateWindowW(szWindowClass,
+       TEXT("操作メニュー"), 
+       WS_OVERLAPPEDWINDOW,
+       CW_USEDEFAULT, 
+       0, 
+       WINDOW_WIDE, 
+       WINDOW_HIGH, 
+       nullptr, 
+       nullptr,
+       hInstance, 
+       nullptr);
 
 
    HWND hWnd2 = CreateWindowW(szWindowClass2, //クラス名
@@ -189,10 +200,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend,hStop;
+    static HWND hSend,hStop, hAllmag;
     
-    COPYDATASTRUCT *SendData = new COPYDATASTRUCT();
-    WPARAM ReceveData = 0;
     WCHAR szBuff[1024];
 
     switch (message)
@@ -213,15 +222,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 //SENDボタンを押したときの動作
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれています"), TEXT("成功"), MB_OK);
-
-                    SendData->dwData = (intptr_t)0;
-                    SendData->cbData = (UINT)13;
-                    SendData->lpData = (PVOID)"RPS1/9/-1000";
-                    SendMessage(hWnd, WM_COPYDATA, ReceveData, (LPARAM)SendData);
-
+                   
                     if (SendMessage != 0) {
-                        wprintf(szBuff, "%s", ReceveData);
+                    
                         MessageBox(hWnd, szBuff, TEXT("Chamonixからの返答"), MB_OK);
                     }
                     else {
@@ -239,6 +242,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     //MessageBox(hWnd, TEXT("BmpWindowが開かれています"), TEXT("成功"), MB_OK);
                     SendMessage(hWnd, IDB_SHOW, NULL, NULL);
                 }
+                break;
+            case ALL_MAG:
+                //ALL MAGボタンを押したときの動作
 
                 break;
             default:
@@ -249,6 +255,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("SEND"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
         hStop = CreateWindow(TEXT("BUTTON"), TEXT("SHOW"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
+        hAllmag = CreateWindow(TEXT("BUTTON"), TEXT("ALL MAG"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ALL_MAG, hInst, NULL);
         break;
     case WM_PAINT:
         {
@@ -325,6 +332,19 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     return 0;
+}
+
+BOOL Send_Stage_Message(HWND hSSM, WCHAR *equipment, WCHAR *controll_num, WCHAR *move) {
+    COPYDATASTRUCT* SendData = new COPYDATASTRUCT();
+    WPARAM ReceveData = 0;
+    WCHAR Send_Message[40];// wcslen(equipment) + wcslen(controll_num) + wcslen(move)];
+
+    SendData->dwData = (intptr_t)0;
+    SendData->cbData = (UINT)13;
+    SendData->lpData = (PVOID)"RPS1/9/-1000";
+
+    SendMessage(hSSM, WM_COPYDATA, ReceveData, (LPARAM)SendData);
+    return (BOOL)SendMessage;
 }
 
 // バージョン情報ボックスのメッセージ ハンドラーです。

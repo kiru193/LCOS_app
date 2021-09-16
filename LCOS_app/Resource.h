@@ -14,6 +14,12 @@
 #define IDB_SHOW						110
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP1                     129
+
+//各種ボタン用
+#define ID_SEND 200
+#define ID_SHOW 201
+#define ALL_MAG 202
+
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
