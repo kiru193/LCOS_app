@@ -38,7 +38,7 @@ int w = 0, h = 0;
 int number = 0;
 
 //回転、Xステージへの送信関数
-BOOL Send_Stage_Message(HWND hSSM, WCHAR equipment, WCHAR controll_num, WCHAR move);
+BOOL Send_Stage_Message(HWND hSSM, WCHAR *equipment, WCHAR *controll_num, WCHAR *move);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -222,7 +222,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 //SENDボタンを押したときの動作
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
-                   
+                    WCHAR eq[5] = TEXT("APS1");
+                    WCHAR con[2] = TEXT("9");
+                    WCHAR move[10] = TEXT("1000");
+
+                    Send_Stage_Message(hWnd, eq, con, move);
                     if (SendMessage != 0) {
                     
                         MessageBox(hWnd, szBuff, TEXT("Chamonixからの返答"), MB_OK);
@@ -337,11 +341,19 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 BOOL Send_Stage_Message(HWND hSSM, WCHAR *equipment, WCHAR *controll_num, WCHAR *move) {
     COPYDATASTRUCT* SendData = new COPYDATASTRUCT();
     WPARAM ReceveData = 0;
-    WCHAR Send_Message[40];// wcslen(equipment) + wcslen(controll_num) + wcslen(move)];
+    WCHAR Send_Contents[30];
+    WCHAR Slash[2] = TEXT("/");
+
+    wcscat_s(Send_Contents, equipment);
+    wcscat_s(Send_Contents, Slash);
+    wcscat_s(Send_Contents, controll_num);
+    wcscat_s(Send_Contents, Slash);
+    wcscat_s(Send_Contents, move);
+
 
     SendData->dwData = (intptr_t)0;
     SendData->cbData = (UINT)13;
-    SendData->lpData = (PVOID)"RPS1/9/-1000";
+    SendData->lpData = (PVOID)Send_Contents;
 
     SendMessage(hSSM, WM_COPYDATA, ReceveData, (LPARAM)SendData);
     return (BOOL)SendMessage;
