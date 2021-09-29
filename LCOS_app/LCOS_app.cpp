@@ -38,7 +38,7 @@ int w = 0, h = 0;
 int number = 0;
 
 //回転、Xステージへの送信関数
-BOOL Send_Stage_Message(HWND hSSM, char* equipment, char* controll_num, char* move);
+BOOL Send_Stage_Message(HWND hSSM,char const* equipment,char const* controll_num,char const* move);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -200,9 +200,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend,hStop, hAllmag;
+    static HWND hSend,hStop, hAllmag,;
     
     WCHAR szBuff[1024];
+    char const *eq = "RPS1", *con = "0", *move = "1000000";
 
     switch (message)
     {
@@ -222,10 +223,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 //SENDボタンを押したときの動作
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
-                    
-                    char eq[] = "RPS1";
-                    char con[] = "9";
-                    char move[] = "1000";
+                    eq = "RPS1";
+                    con = "9";
+                    move = "1000";
 
                     Send_Stage_Message(hWnd, eq, con, move);
                     if (SendMessage != 0) {
@@ -250,6 +250,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case ALL_MAG:
                 //ALL MAGボタンを押したときの動作
+                eq = "RPS2";
+                con = "9";
+                move = "180000";
+                Send_Stage_Message(hWnd, eq, con, move);
 
                 break;
             default:
@@ -339,7 +343,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-BOOL Send_Stage_Message(HWND hSSM, char *equipment, char *controll_num, char *move) {
+BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,char const *move) {
     COPYDATASTRUCT* SendData = new COPYDATASTRUCT();
     WPARAM ReceveData = 0;
     char Send_Contents[50] = {};
