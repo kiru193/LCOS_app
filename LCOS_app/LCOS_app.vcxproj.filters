@@ -34,22 +34,52 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LCOS_app.rc">
-      <Filter>リソース ファイル</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="small.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
-    <Image Include="LCOS_app.ico">
+    <Image Include="test_picture\0.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
-    <Image Include="char.bmp">
+    <Image Include="test_picture\1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\2.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\3.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\4.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\5.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\6.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\7.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\8.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\9.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
     <Image Include="checker.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="char.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="LCOS_app.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LCOS_app.rc">
+      <Filter>リソース ファイル</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
