@@ -203,7 +203,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static HWND hSend,hStop, hAllmag;
     
     WCHAR szBuff[1024];
-    char const *eq = "RPS1", *con = "0", *move = "1000000";
+    char const *eq = "RPS1", *con = "0", *move = "10000000";
 
     switch (message)
     {
@@ -216,16 +216,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
+
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
+
             case ID_SEND:
                 //SENDボタンを押したときの動作
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
                     eq = "RPS1";
                     con = "9";
-                    move = "1000";
+                    move = "10000";
 
                     Send_Stage_Message(hWnd, eq, con, move);
                     if (SendMessage != 0) {
@@ -240,6 +242,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                 }
                 break;
+
             case ID_SHOW:
                 //SHOWボタンを押したときの動作
                 hWnd = FindWindow(NULL, TEXT("BmpWindow"));
@@ -248,13 +251,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     SendMessage(hWnd, IDB_SHOW, NULL, NULL);
                 }
                 break;
+
             case ALL_MAG:
                 //ALL MAGボタンを押したときの動作
-                eq = "RPS2";
-                con = "9";
-                move = "180000";
-                Send_Stage_Message(hWnd, eq, con, move);
-
+                hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                if (hWnd != 0) {
+                    eq = "RPS2";
+                    con = "9";
+                    move = "90000";
+                    Send_Stage_Message(hWnd, eq, con, move);
+                    while (SendMessage == 0);
+                    Send_Stage_Message(hWnd, eq, con, move);
+                }
+                else {
+                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+                }
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -348,14 +359,7 @@ BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,
     WPARAM ReceveData = 0;
     char Send_Contents[50] = {};
     char Slash[] = "/";
-    /*
-    wcscat_s(Send_Contents, equipment);
-    wcscat_s(Send_Contents, Slash);
-    wcscat_s(Send_Contents, controll_num);
-    wcscat_s(Send_Contents, Slash);
-    wcscat_s(Send_Contents, move);
-    */
-    //char mm[] = "RPS1/9/10000";
+
     strcat_s(Send_Contents, equipment);
     strcat_s(Send_Contents, Slash);
     strcat_s(Send_Contents, controll_num);
