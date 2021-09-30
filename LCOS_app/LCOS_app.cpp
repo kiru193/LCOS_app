@@ -200,7 +200,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend,hStop, hAllmag;
+    static HWND hSend,hStop, hAllmag,hWrintig;
     
     WCHAR szBuff[1024];
     char const *eq = "RPS1", *con = "0", *move = "10000000";
@@ -260,13 +260,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     con = "9";
                     move = "90000";
                     Send_Stage_Message(hWnd, eq, con, move);
-                    while (SendMessage == 0);
+                    while (Send_Stage_Message == 0);
                     Send_Stage_Message(hWnd, eq, con, move);
                 }
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                 }
                 break;
+
+            case WRITING:
+                //WRITINGボタンを押したときの動作
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -276,6 +279,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("SEND"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
         hStop = CreateWindow(TEXT("BUTTON"), TEXT("SHOW"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
         hAllmag = CreateWindow(TEXT("BUTTON"), TEXT("ALL MAG"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ALL_MAG, hInst, NULL);
+        hWrintig = CreateWindow(TEXT("BUTTON"), TEXT("WRITING"), WS_CHILD | WS_VISIBLE, 130, 50, 100, 30, hWnd, (HMENU)ALL_MAG, hInst, NULL);
         break;
     case WM_PAINT:
         {
@@ -365,7 +369,7 @@ BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,
     strcat_s(Send_Contents, controll_num);
     strcat_s(Send_Contents, Slash);
     strcat_s(Send_Contents, move);
-    //Send_Contents = equipment + Slash + controll_num +
+
     SendData->dwData = (intptr_t)0;
     SendData->cbData = (UINT)12;
     SendData->lpData = (PVOID)Send_Contents;
