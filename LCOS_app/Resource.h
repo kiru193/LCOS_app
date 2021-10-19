@@ -11,7 +11,6 @@
 #define IDI_LCOSAPP                     107
 #define IDI_SMALL                       108
 #define IDC_LCOSAPP                     109
-#define IDB_SHOW                        110
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP1                     129
 #define IDB_BITMAP2                     130
@@ -19,7 +18,6 @@
 #define ID_SHOW                         201
 #define ALL_MAG                         202
 #define WRITING                         203
-#define ID_SHOW2						204
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
