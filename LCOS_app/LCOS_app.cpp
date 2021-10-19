@@ -258,7 +258,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
                     eq = "RPS2";//RPS"2"この2が動作させる機器の番号に対応する。（CharmonixやCRUXを見ればどちらが何番かがわかるはず。）
-                    con = "9";//Charmonix内のSystemに保存されている速度テーブルの選択番号
+                    con = "0";//Charmonix内のSystemに保存されている速度テーブルの選択番号
+                    //以下番号要約
+                    //0：タイリング法における最適値（とりあえず）
+                    //1～8:予約（必要になり次第、登録すること）
+                    //9：自由に変えてよい値、テスト、試験用
                     move = "90000";//これで半回転　入力可能な値は5桁の数字まで、6桁の数字を入力すると一の位が省略された数字が入力されたと判断され動作する。
                     Send_Stage_Message(hWnd, eq, con, move);
                     while (Send_Stage_Message == 0);
@@ -274,7 +278,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
                     eq = "RPS2";
-                    con = "9";
+                    con = "0";
                     move = "9000";
                     for (int i = 0; i < 10; i++) {
                         hWnd = FindWindow(NULL, TEXT("Chamonix"));
