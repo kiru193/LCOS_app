@@ -282,10 +282,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (hWnd != 0) {
                     eq = "RPS2";
                     con = "9";
-                    move = "90000";
-                    Send_Stage_Message(hWnd, eq, con, move);
-                    while (Send_Stage_Message == 0);
-                    Send_Stage_Message(hWnd, eq, con, move);
+                    move = "9000";
+                    for (int i = 0; i < 10; i++) {
+                        hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                        Send_Stage_Message(hWnd, eq, con, move);
+                        while (Send_Stage_Message == 0);
+                        number = i;
+                        hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                        SendMessage(hWnd, WM_PAINT, NULL, NULL);
+                    }
                 }
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
@@ -347,7 +352,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_CREATE:
-        //デバイスコンテキストhdc_menにビットマップリソース画像を読み込む
+        //デバイスコンテキストhdc_menにビットマップリソース画像を読み込む　（注）投入する画像ファイルの名前は,～～1,～～2,…のようにしておいてください
         //for文を用いて一気にすべてのbmpを読み込む
         for (int i = 0; i < 10; i++) {
             hdc = GetDC(hWnd);
@@ -357,7 +362,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SelectObject(hdc_men_array[i], hBmp[i]);
             ReleaseDC(hWnd, hdc);
         }
-        //bitmap画像の取得、w、h変数に画像の横幅、縦幅を入力する
+        //bitmap画像の取得、w、h変数に画像の横幅、縦幅を入力する （注）投入する画像の縦横幅は統一しておいてください
         GetObject(hBmp[0], (int)sizeof(BITMAP), &bmp_info);
         w = bmp_info.bmWidth;
         h = bmp_info.bmHeight;
@@ -367,14 +372,11 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_PAINT:
+        InvalidateRect(hWnd, NULL, TRUE);
         hdc = BeginPaint(hWnd, &ps);
         // TODO: 描画コードをここに追加してください...
-        if (number == 1) {
-            hdc_men = hdc_men_array[1];
-        }
-        else if (number == 2) {
-            hdc_men = hdc_men_array[2];
-        }
+        hdc_men = hdc_men_array[number];
+
         BitBlt(hdc, (MonitorInfoEx.rcMonitor.right - MonitorInfoEx.rcMonitor.left) / 2 - w / 2, (MonitorInfoEx.rcMonitor.bottom - MonitorInfoEx.rcMonitor.top) / 2 - h / 2, w, h, hdc_men, 0, 0, SRCCOPY);
 
         EndPaint(hWnd, &ps);
