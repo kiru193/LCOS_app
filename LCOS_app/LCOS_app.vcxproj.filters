@@ -51,5 +51,38 @@
     <Image Include="checker.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="sample1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\0.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\2.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\3.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\4.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\5.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\6.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\7.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\8.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="test_picture\9.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
 </Project>
