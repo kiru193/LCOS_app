@@ -21,12 +21,10 @@
 #define TEST3                           162
 #define TEST4                           163
 #define TEST5                           164
-#define IDB_BITMAP9                     165
 #define TEST6                           165
 #define TEST7                           166
 #define TEST8                           167
 #define TEST9                           168
-#define IDB_BITMAP3                     169
 #define ID_SEND                         200
 #define ID_SHOW                         201
 #define ALL_MAG                         202
@@ -38,7 +36,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        170
+#define _APS_NEXT_RESOURCE_VALUE        173
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110

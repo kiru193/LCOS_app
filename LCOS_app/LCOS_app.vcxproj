@@ -153,6 +153,8 @@
   <ItemGroup>
     <Image Include="char.bmp" />
     <Image Include="checker.bmp" />
+    <Image Include="checker1.bmp" />
+    <Image Include="checker2.bmp" />
     <Image Include="LCOS_app.ico" />
     <Image Include="sample1.bmp" />
     <Image Include="small.ico" />

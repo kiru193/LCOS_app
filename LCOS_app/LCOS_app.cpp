@@ -258,10 +258,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (hWnd != 0) {
                     eq = "RPS2";
                     con = "9";
-                    move = "90000";
+                    move = "900";
                     Send_Stage_Message(hWnd, eq, con, move);
                     while (Send_Stage_Message == 0);
+                    eq = "RPS2";
+                    con = "9";
+                    move = "900";
                     Send_Stage_Message(hWnd, eq, con, move);
+                    while (Send_Stage_Message == 0);
+
+                    
                 }
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
@@ -325,7 +331,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         //デバイスコンテキストhdc_menにビットマップリソース画像を読み込む
         hdc = GetDC(hWnd);
-        hBmp = LoadBitmap(hInst, TEXT("CHECKER"));
+        hBmp = LoadBitmap(hInst, TEXT("SAMPLE"));
         hdc_men1 = CreateCompatibleDC(hdc);
         SelectObject(hdc_men1, hBmp);
         GetObject(hBmp, (int)sizeof(BITMAP), &bmp_info);//bitmap画像の取得

@@ -84,5 +84,11 @@
     <Image Include="test_picture\9.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="checker1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="checker2.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
 </Project>
