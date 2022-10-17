@@ -200,7 +200,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend,hShow, hAllmag,hWrintig;
+    static HWND hSend,hShow, hAllmag,hWrintig,hTestwriting;
     static HWND hShow2;
 
     WCHAR szBuff[1024];
