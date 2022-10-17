@@ -148,9 +148,6 @@
     <ClCompile Include="LCOS_app.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LCOS_app.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="char.bmp" />
     <Image Include="checker.bmp" />
     <Image Include="checker1.bmp" />
@@ -168,6 +165,9 @@
     <Image Include="test_picture\7.bmp" />
     <Image Include="test_picture\8.bmp" />
     <Image Include="test_picture\9.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LCOS_app.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

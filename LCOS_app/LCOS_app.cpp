@@ -33,7 +33,7 @@ POINT pt = { 1921, 0 };
 
 //BITMAPに必要な変数
 HDC hdc_men = 0;
-HDC hdc_men1 = 0;
+HDC hdc_men_array[10];
 int w = 0, h = 0;
 int number = 0;
 
@@ -200,7 +200,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend,hStop, hAllmag,hWrintig,hTestwriting;
+    static HWND hSend,hShow, hAllmag,hWrintig;
+    static HWND hShow2;
+
     WCHAR szBuff[1024];
     char const *eq = "RPS1", *con = "0", *move = "10000000";
 
@@ -245,19 +247,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SHOW:
                 //SHOWボタンを押したときの動作
                 hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                number = 1;
                 if (hWnd != 0) {
-                    //MessageBox(hWnd, TEXT("BmpWindowが開かれています"), TEXT("成功"), MB_OK);
-                    SendMessage(hWnd, IDB_SHOW, NULL, NULL);
+                    SendMessage(hWnd, WM_PAINT, NULL, NULL);
                 }
                 break;
-
             case ALL_MAG:
+
                 //ALL MAGボタンを押したときの動作
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
-                    eq = "RPS2";
-                    con = "9";
-                    move = "900";
+                    eq = "RPS2";//RPS"2"この2が動作させる機器の番号に対応する。（CharmonixやCRUXを見ればどちらが何番かがわかるはず。）
+                    con = "0";//Charmonix内のSystemに保存されている速度テーブルの選択番号
+                    //以下番号要約
+                    //0：タイリング法における最適値（とりあえず）
+                    //1～8:予約（必要になり次第、登録すること）
+                    //9：自由に変えてよい値、テスト、試験用
+                    move = "90000";//これで半回転　入力可能な値は5桁の数字まで、6桁の数字を入力すると一の位が省略された数字が入力されたと判断され動作する。
                     Send_Stage_Message(hWnd, eq, con, move);
                     while (Send_Stage_Message == 0);
                     eq = "RPS2";
@@ -273,30 +279,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case WRITING:
                 //WRITINGボタンを押したときの動作
-                MessageBox(hWnd, TEXT("WRIGINの開始"), TEXT("確認"), MB_OK);
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
-                    //以下，内容
-
-                    //以上内容
+                    eq = "RPS2";
+                    con = "0";
+                    move = "9000";
+                    for (int i = 0; i < 10; i++) {
+                        hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                        Send_Stage_Message(hWnd, eq, con, move);
+                        while (Send_Stage_Message == 0);
+                        number = i;
+                        hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                        SendMessage(hWnd, WM_PAINT, NULL, NULL);
+                    }
                 }
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                 }
                 break;
-
-            case ID_TEST:
-                //TESTボタンを押したときの動作
-                MessageBox(hWnd, TEXT("テストです"), TEXT("確認"), MB_OK);
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                       
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
-                break;
-
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -304,7 +304,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_CREATE:
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("SEND"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
-        hStop = CreateWindow(TEXT("BUTTON"), TEXT("SHOW"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
+        hShow = CreateWindow(TEXT("BUTTON"), TEXT("SHOW"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
         hAllmag = CreateWindow(TEXT("BUTTON"), TEXT("ALL MAG"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ALL_MAG, hInst, NULL);
         hWrintig = CreateWindow(TEXT("BUTTON"), TEXT("WRITING"), WS_CHILD | WS_VISIBLE, 130, 50, 100, 30, hWnd, (HMENU)WRITING, hInst, NULL);
         hTestwriting = CreateWindow(TEXT("BUTTON"), TEXT("TEST"), WS_CHILD | WS_VISIBLE, 130, 10, 100, 30, hWnd, (HMENU)ID_TEST, hInst, NULL);
@@ -331,9 +331,11 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
     HDC hdc;
 
-    HBITMAP hBmp = 0;
+    HBITMAP hBmp[10];
     BITMAP bmp_info;
 
+    TCHAR bmpname[] = TEXT("TEST0");
+    
     switch (message) {
     case WM_COMMAND:
         wmId = LOWORD(wParam);
@@ -351,29 +353,27 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_CREATE:
-        //デバイスコンテキストhdc_menにビットマップリソース画像を読み込む
-        hdc = GetDC(hWnd);
-        hBmp = LoadBitmap(hInst, TEXT("SAMPLE"));
-        hdc_men1 = CreateCompatibleDC(hdc);
-        SelectObject(hdc_men1, hBmp);
-        GetObject(hBmp, (int)sizeof(BITMAP), &bmp_info);//bitmap画像の取得
+        //デバイスコンテキストhdc_menにビットマップリソース画像を読み込む　（注）投入する画像ファイルの名前は,～～1,～～2,…のようにしておいてください
+        //for文を用いて一気にすべてのbmpを読み込む
+        for (int i = 0; i < 10; i++) {
+            hdc = GetDC(hWnd);
+            wsprintf(bmpname, TEXT("TEST%d"), i);
+            hBmp[i] = LoadBitmap(hInst, bmpname);
+            hdc_men_array[i] = CreateCompatibleDC(hdc);
+            SelectObject(hdc_men_array[i], hBmp[i]);
+            ReleaseDC(hWnd, hdc);
+        }
+        //bitmap画像の取得、w、h変数に画像の横幅、縦幅を入力する （注）投入する画像の縦横幅は統一しておいてください
+        GetObject(hBmp[0], (int)sizeof(BITMAP), &bmp_info);
         w = bmp_info.bmWidth;
         h = bmp_info.bmHeight;
-        ReleaseDC(hWnd, hdc);
         break;
-    case IDB_SHOW:
-        number = 1;
-        InvalidateRect(hWnd, NULL, TRUE);
-        break;
-
     case WM_PAINT:
+        //第二画面にてビットマップを表示させるプログラム
+        InvalidateRect(hWnd, NULL, TRUE);//←これ必須
         hdc = BeginPaint(hWnd, &ps);
-        // TODO: 描画コードをここに追加してください...
-        if (number == 1) {
-            hdc_men = hdc_men1;
-        }
+        hdc_men = hdc_men_array[number];
         BitBlt(hdc, (MonitorInfoEx.rcMonitor.right - MonitorInfoEx.rcMonitor.left) / 2 - w / 2, (MonitorInfoEx.rcMonitor.bottom - MonitorInfoEx.rcMonitor.top) / 2 - h / 2, w, h, hdc_men, 0, 0, SRCCOPY);
-
         EndPaint(hWnd, &ps);
         break;
     case WM_DESTROY:
