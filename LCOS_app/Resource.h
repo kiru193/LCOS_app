@@ -29,6 +29,7 @@
 #define ID_SHOW                         201
 #define ALL_MAG                         202
 #define WRITING                         203
+#define ID_TEST							204
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
