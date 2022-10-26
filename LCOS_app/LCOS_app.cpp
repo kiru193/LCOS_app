@@ -279,7 +279,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case WRITING:
                 //WRITINGボタンを押したときの動作
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                for (int i = 0; i < 10; i++) {
+                    //hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                    //Send_Stage_Message(hWnd, eq, con, move);
+                    //while (Send_Stage_Message == 0);
+                    number = i;
+                    hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                    SendMessage(hWnd, WM_PAINT, NULL, NULL);
+                    MessageBox(hWnd, TEXT("%d"), TEXT("確認"), MB_OK);
+                }
+                MessageBox(hWnd, TEXT("Writing は終了しました．"), TEXT("確認"), MB_OK);
+                /*hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
                     eq = "RPS2";
                     con = "0";
@@ -296,6 +306,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                 }
+                */
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
