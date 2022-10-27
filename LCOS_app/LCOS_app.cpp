@@ -33,7 +33,7 @@ POINT pt = { 1921, 0 };
 
 //BITMAPに必要な変数
 HDC hdc_men = 0;
-HDC hdc_men_array[10];
+HDC hdc_men_array[34];
 int w = 0, h = 0;
 int number = 0;
 
@@ -279,16 +279,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case WRITING:
                 //WRITINGボタンを押したときの動作
-                for (int i = 0; i < 10; i++) {
-                    //hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                    //Send_Stage_Message(hWnd, eq, con, move);
-                    //while (Send_Stage_Message == 0);
-                    number = i;
+                for (int i = 0; i < 16; i++) {
                     hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                    number = i;
                     SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                    MessageBox(hWnd, TEXT("%d"), TEXT("確認"), MB_OK);
+                    Sleep(50);
                 }
-                MessageBox(hWnd, TEXT("Writing は終了しました．"), TEXT("確認"), MB_OK);
+                
+                for (int i = 16; i < 32; i++) {
+                    hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                    number = i;
+                    SendMessage(hWnd, WM_PAINT, NULL, NULL);
+                    Sleep(33);
+                }
+
+                number = 33;
+                SendMessage(hWnd, WM_PAINT, NULL, NULL);
+
                 /*hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
                     eq = "RPS2";
@@ -307,6 +314,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                 }
                 */
+
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -342,10 +350,10 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
     HDC hdc;
 
-    HBITMAP hBmp[10];
+    HBITMAP hBmp[34];
     BITMAP bmp_info;
 
-    TCHAR bmpname[] = TEXT("TEST0");
+    TCHAR bmpname[] = TEXT("cubic10");
     
     switch (message) {
     case WM_COMMAND:
@@ -366,14 +374,28 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         //デバイスコンテキストhdc_menにビットマップリソース画像を読み込む　（注）投入する画像ファイルの名前は,～～1,～～2,…のようにしておいてください
         //for文を用いて一気にすべてのbmpを読み込む
-        for (int i = 0; i < 10; i++) {
+
+        hdc = GetDC(hWnd);
+        hBmp[0] = LoadBitmap(hInst, TEXT("START_END"));
+        hdc_men_array[0] = CreateCompatibleDC(hdc);
+        SelectObject(hdc_men_array[0], hBmp[0]);
+        ReleaseDC(hWnd, hdc);
+
+        for (int i = 1; i < 33; i++) {
             hdc = GetDC(hWnd);
-            wsprintf(bmpname, TEXT("TEST%d"), i);
+            wsprintf(bmpname, TEXT("cubic%d"), i);
             hBmp[i] = LoadBitmap(hInst, bmpname);
             hdc_men_array[i] = CreateCompatibleDC(hdc);
             SelectObject(hdc_men_array[i], hBmp[i]);
             ReleaseDC(hWnd, hdc);
         }
+
+        hdc = GetDC(hWnd);
+        hBmp[33] = LoadBitmap(hInst, TEXT("START_END"));
+        hdc_men_array[33] = CreateCompatibleDC(hdc);
+        SelectObject(hdc_men_array[33], hBmp[33]);
+        ReleaseDC(hWnd, hdc);
+
         //bitmap画像の取得、w、h変数に画像の横幅、縦幅を入力する （注）投入する画像の縦横幅は統一しておいてください
         GetObject(hBmp[0], (int)sizeof(BITMAP), &bmp_info);
         w = bmp_info.bmWidth;

@@ -115,6 +115,108 @@
     <Image Include="test_picture\1.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="test_picture\bitmap3.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_0.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_2.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_3.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_4.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_5.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_6.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_7.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_8.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_9.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_A.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_B.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_C.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_D.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_E.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_F.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_0.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_2.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_3.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_4.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_5.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_6.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_7.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_8.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_9.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_A.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_B.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_C.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_D.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_E.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_F.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="CGH\others\checker_1pix.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LCOS_app.rc">
