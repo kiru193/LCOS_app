@@ -298,10 +298,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (hWnd != 0) {
                     eq = "RPS2";
                     con = "9";
-                    move = "6000";
+                    move = "5875";
                     Send_Stage_Message(hWnd, eq, con, move);
                     while (Send_Stage_Message == 0);
-                    Sleep(500);
+                    Sleep(700);
                 }
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
