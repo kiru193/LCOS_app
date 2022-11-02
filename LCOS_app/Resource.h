@@ -2,7 +2,6 @@
 // Microsoft Visual C++ で生成されたインクルード ファイル。
 // LCOS_app.rc で使用
 //
-#define IDC_MYICON                      2
 #define IDD_LCOSAPP_DIALOG              102
 #define IDD_ABOUTBOX                    103
 #define IDM_ABOUT                       104
@@ -26,7 +25,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        224
+#define _APS_NEXT_RESOURCE_VALUE        417
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110

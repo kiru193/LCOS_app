@@ -10,6 +10,20 @@
 #define WINDOW_WIDE 400
 #define WINDOW_HIGH 200
 
+#define MOVIE_START 2
+#define MOVIE_END 0
+#define MOVIE_WAIT 0
+#define HPK 1
+
+#define Split_Image 12
+#define Separate_Image 16
+#define Num_Image Split_Image*Separate_Image
+
+#define X_Forward 0
+#define X_Backward 1
+#define Rotate_Forward 2
+#define Rotate_Backward 3
+
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
@@ -35,7 +49,7 @@ POINT pt = { 1921, 0 };
 HDC hdc_men = 0;
 HDC hdc_men_array[50];
 int w = 0, h = 0;
-int number = 0;
+int drawing = 0;
 
 //回転、Xステージへの送信関数
 BOOL Send_Stage_Message(HWND hSSM,char const* equipment,char const* controll_num,char const* move);
@@ -206,6 +220,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     WCHAR szBuff[1024];
     char const *eq = "RPS1", *con = "0", *move = "10000000";
 
+    int Set_moving_stage[] = {
+        X_Forward,
+        Rotate_Forward,
+        X_Backward,
+        Rotate_Forward
+    };
+    int count = 0;
+
+
+
     switch (message)
     {
     case WM_COMMAND:
@@ -247,7 +271,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SHOW:
                 //SHOWボタンを押したときの動作
                 hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                number = 1;
+                drawing = HPK;
                 SendMessage(hWnd, WM_PAINT, NULL, NULL);
                 break;
             case ALL_MAG:
@@ -277,64 +301,63 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case WRITING:
                 //WRITINGボタンを押したときの動作
-                for (int i = 1; i < 17; i++) {
+                for (int i = MOVIE_START; i < MOVIE_START + Num_Image; i++) {
                     hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                    number = i;
+                    drawing = i;
                     SendMessage(hWnd, WM_PAINT, NULL, NULL);
                     Sleep(50);
-                }
-                
-                for (int i = 17; i < 33; i++) {
-                    hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                    number = i;
-                    SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                    Sleep(20);
-                }
-
-                number = 0;
-                SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                    eq = "RPS2";
-                    con = "9";
-                    move = "5875";
-                    Send_Stage_Message(hWnd, eq, con, move);
-                    while (Send_Stage_Message == 0);
-                    Sleep(700);
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
-
-                for (int i = 32; i < 48; i++) {
-                    hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                    number = i;
-                    SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                    Sleep(50);
-                }
-                
-                number = 0;
-                SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                /*hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                    eq = "RPS2";
-                    con = "0";
-                    move = "9000";
-                    for (int i = 0; i < 10; i++) {
-                        hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                        Send_Stage_Message(hWnd, eq, con, move);
-                        while (Send_Stage_Message == 0);
-                        number = i;
-                        hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                    if (i == 65 || i == 129 || i==161 || i==193) {
+                        drawing = MOVIE_WAIT;
                         SendMessage(hWnd, WM_PAINT, NULL, NULL);
+                        hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                        if (hWnd != 0) {
+                            switch (Set_moving_stage[count])
+                            {
+                            case X_Forward:
+                                eq = "RPS2";
+                                con = "9";
+                                move = "5875";
+                                Send_Stage_Message(hWnd, eq, con, move);
+                                while (Send_Stage_Message == 0);
+                                Sleep(700);
+                                break;
+                            case X_Backward:
+                                eq = "RPS2";
+                                con = "9";
+                                move = "-5875";
+                                Send_Stage_Message(hWnd, eq, con, move);
+                                while (Send_Stage_Message == 0);
+                                Sleep(700);
+                                break;
+                            case Rotate_Forward:
+                                eq = "RPS1";
+                                con = "9";
+                                move = "4781";
+                                Send_Stage_Message(hWnd, eq, con, move);
+                                while (Send_Stage_Message == 0);
+                                Sleep(700);
+                                break;
+                            case Rotate_Backward:
+                                eq = "RPS1";
+                                con = "9";
+                                move = "-4781";
+                                Send_Stage_Message(hWnd, eq, con, move);
+                                while (Send_Stage_Message == 0);
+                                Sleep(700);
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                        else {
+                            MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+                        }
+                        count++;
                     }
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
-                */
-
+                }                
+                drawing = 0;
+                SendMessage(hWnd, WM_PAINT, NULL, NULL);
+               
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -343,7 +366,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_CREATE:
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("SEND"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
-        hShow = CreateWindow(TEXT("BUTTON"), TEXT("SHOW"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
+        hShow = CreateWindow(TEXT("BUTTON"), TEXT("SHOW HPK"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
         hAllmag = CreateWindow(TEXT("BUTTON"), TEXT("ALL MAG"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ALL_MAG, hInst, NULL);
         hWrintig = CreateWindow(TEXT("BUTTON"), TEXT("WRITING"), WS_CHILD | WS_VISIBLE, 130, 50, 100, 30, hWnd, (HMENU)WRITING, hInst, NULL);
         hTestwriting = CreateWindow(TEXT("BUTTON"), TEXT("TEST"), WS_CHILD | WS_VISIBLE, 130, 10, 100, 30, hWnd, (HMENU)ID_TEST, hInst, NULL);
@@ -370,10 +393,10 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
     HDC hdc;
 
-    HBITMAP hBmp[50];
+    HBITMAP hBmp[200];
     BITMAP bmp_info;
 
-    TCHAR bmpname[] = TEXT("cubic10");
+    TCHAR bmpname[] = TEXT("cubic10_10");
     
     switch (message) {
     case WM_COMMAND:
@@ -395,19 +418,26 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         //デバイスコンテキストhdc_menにビットマップリソース画像を読み込む　（注）投入する画像ファイルの名前は,～～1,～～2,…のようにしておいてください
         //for文を用いて一気にすべてのbmpを読み込む
 
+        //START，END，HPK画像の読み込み
         hdc = GetDC(hWnd);
         hBmp[0] = LoadBitmap(hInst, TEXT("START_END"));
         hdc_men_array[0] = CreateCompatibleDC(hdc);
         SelectObject(hdc_men_array[0], hBmp[0]);
+
+        hBmp[1] = LoadBitmap(hInst, TEXT("HPK"));
+        hdc_men_array[1] = CreateCompatibleDC(hdc);
+        SelectObject(hdc_men_array[1], hBmp[1]);
         ReleaseDC(hWnd, hdc);
 
-        for (int i = 1; i < 49; i++) {
-            hdc = GetDC(hWnd);
-            wsprintf(bmpname, TEXT("cubic%d"), i-1);
-            hBmp[i] = LoadBitmap(hInst, bmpname);
-            hdc_men_array[i] = CreateCompatibleDC(hdc);
-            SelectObject(hdc_men_array[i], hBmp[i]);
-            ReleaseDC(hWnd, hdc);
+        for (int i = 0; i < Split_Image; i++) {
+            for (int m = 0; m < Separate_Image; m++) {
+                hdc = GetDC(hWnd);
+                wsprintf(bmpname, TEXT("cubic%d_%d"), i, m);
+                hBmp[MOVIE_START + Separate_Image * i + m] = LoadBitmap(hInst, bmpname);
+                hdc_men_array[MOVIE_START + 16 * i + m] = CreateCompatibleDC(hdc);
+                SelectObject(hdc_men_array[MOVIE_START + Separate_Image * i + m], hBmp[MOVIE_START + Separate_Image * i + m]);
+                ReleaseDC(hWnd, hdc);
+            }
         }
 
         //bitmap画像の取得、w、h変数に画像の横幅、縦幅を入力する （注）投入する画像の縦横幅は統一しておいてください
@@ -419,7 +449,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         //第二画面にてビットマップを表示させるプログラム
         InvalidateRect(hWnd, NULL, TRUE);//←これ必須
         hdc = BeginPaint(hWnd, &ps);
-        hdc_men = hdc_men_array[number];
+        hdc_men = hdc_men_array[drawing];
         BitBlt(hdc, (MonitorInfoEx.rcMonitor.right - MonitorInfoEx.rcMonitor.left) / 2 - w / 2, (MonitorInfoEx.rcMonitor.bottom - MonitorInfoEx.rcMonitor.top) / 2 - h / 2, w, h, hdc_men, 0, 0, SRCCOPY);
         EndPaint(hWnd, &ps);
         break;

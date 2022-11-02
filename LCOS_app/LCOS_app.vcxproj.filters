@@ -13,6 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="リソース ファイル\test_num">
+      <UniqueIdentifier>{4c7140c9-90d5-428a-8d91-15869472a328}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\others">
+      <UniqueIdentifier>{70a9b6a4-c8fd-4c79-b41a-e770f9a5f146}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\cubics">
+      <UniqueIdentifier>{7be56d61-2337-4163-b973-a085c3c32089}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\cubics\test1">
+      <UniqueIdentifier>{70c6f937-d23d-48a5-925d-531ff82e49ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\cubics\test2">
+      <UniqueIdentifier>{6413a4c8-6e50-4564-87af-8beb2c9a28db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -37,48 +52,12 @@
     <Image Include="small.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
-    <Image Include="test_picture\2.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="test_picture\3.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="test_picture\4.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="test_picture\5.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="test_picture\6.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="test_picture\7.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="test_picture\8.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="test_picture\9.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="checker.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="char.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
     <Image Include="LCOS_app.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
     <Image Include="sample1.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
-    <Image Include="test_picture\0.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="test_picture\1.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
     <Image Include="test_picture\2.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
@@ -103,170 +82,785 @@
     <Image Include="test_picture\9.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
-    <Image Include="checker1.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="checker2.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
     <Image Include="test_picture\0.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
     <Image Include="test_picture\1.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="test_picture\0.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\1.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\2.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\3.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\4.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\5.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\6.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\7.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\8.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\9.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
     <Image Include="test_picture\bitmap3.bmp">
-      <Filter>リソース ファイル</Filter>
+      <Filter>リソース ファイル\others</Filter>
     </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_0.bmp">
-      <Filter>リソース ファイル</Filter>
+    <Image Include="char.bmp">
+      <Filter>リソース ファイル\others</Filter>
     </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_1.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_2.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_3.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_4.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_5.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_6.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_7.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_8.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_9.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_A.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_B.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_C.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_D.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_E.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.1_F.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_0.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_1.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_2.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_3.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_4.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_5.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_6.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_7.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_8.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_9.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_A.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_B.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_C.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_D.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_E.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_2.1_F.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\others\checker_1pix.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_0.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_1.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_2.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_3.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_4.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_5.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_6.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_7.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_8.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_9.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_A.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_B.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_C.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_D.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_E.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="CGH\cubic\test1\P_1.2_F.bmp">
-      <Filter>リソース ファイル</Filter>
+    <Image Include="checker.bmp">
+      <Filter>リソース ファイル\others</Filter>
     </Image>
     <Image Include="CGH\others\checker.bmp">
-      <Filter>リソース ファイル</Filter>
+      <Filter>リソース ファイル\others</Filter>
+    </Image>
+    <Image Include="CGH\others\checker_1pix.bmp">
+      <Filter>リソース ファイル\others</Filter>
+    </Image>
+    <Image Include="checker1.bmp">
+      <Filter>リソース ファイル\others</Filter>
+    </Image>
+    <Image Include="checker2.bmp">
+      <Filter>リソース ファイル\others</Filter>
+    </Image>
+    <Image Include="CGH\others\P_original.bmp">
+      <Filter>リソース ファイル\others</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_0.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_1.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_2.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_3.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_4.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_5.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_6.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_7.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_8.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_9.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_A.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_B.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_C.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_D.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_E.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.1_F.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_0.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_1.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_2.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_3.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_4.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_5.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_6.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_7.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_8.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_9.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_A.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_B.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_C.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_D.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_E.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_1.2_F.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_0.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_1.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_2.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_3.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_4.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_5.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_6.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_7.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_8.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_9.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_A.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_B.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_C.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_D.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_E.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test1\P_2.1_F.bmp">
+      <Filter>リソース ファイル\cubics\test1</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic0_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic1_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic2_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic3_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic4_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic5_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic6_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic7_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic8_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic9_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic10_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_0.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_1.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_2.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_3.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_4.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_5.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_6.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_7.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_8.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_9.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_10.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_11.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_12.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_13.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_14.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
+    </Image>
+    <Image Include="CGH\cubic\test2\cubic11_15.bmp">
+      <Filter>リソース ファイル\cubics\test2</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
