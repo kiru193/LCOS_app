@@ -19,10 +19,10 @@
 #define Separate_Image 16
 #define Num_Image Split_Image*Separate_Image
 
-#define X_Forward 0
-#define X_Backward 1
-#define Rotate_Forward 2
-#define Rotate_Backward 3
+#define X_Forward 0b01
+#define X_Backward 0b10
+#define Rotate_Forward 0b1010
+#define Rotate_Backward 0b0101
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -214,7 +214,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend,hShow, hAllmag,hWrintig,hTestwriting;
+    static HWND hSend, hShow, hAllmag, hWrintig, hTestwriting, hReset;
     static HWND hShow2;
 
     WCHAR szBuff[1024];
@@ -227,8 +227,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         Rotate_Forward
     };
     int count = 0;
-
-
 
     switch (message)
     {
@@ -359,6 +357,57 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SendMessage(hWnd, WM_PAINT, NULL, NULL);
                
                 break;
+
+            case ID_RESET:
+                for (int i = 0; i < sizeof(Set_moving_stage); i++) {
+                    drawing = MOVIE_WAIT;
+                    SendMessage(hWnd, WM_PAINT, NULL, NULL);
+                    hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                    if (hWnd != 0) {
+                        switch (~Set_moving_stage[count])
+                        {
+                        case X_Forward:
+                            eq = "RPS2";
+                            con = "9";
+                            move = "5875";
+                            Send_Stage_Message(hWnd, eq, con, move);
+                            while (Send_Stage_Message == 0);
+                            Sleep(700);
+                            break;
+                        case X_Backward:
+                            eq = "RPS2";
+                            con = "9";
+                            move = "-5875";
+                            Send_Stage_Message(hWnd, eq, con, move);
+                            while (Send_Stage_Message == 0);
+                            Sleep(700);
+                            break;
+                        case Rotate_Forward:
+                            eq = "RPS1";
+                            con = "9";
+                            move = "4781";
+                            Send_Stage_Message(hWnd, eq, con, move);
+                            while (Send_Stage_Message == 0);
+                            Sleep(700);
+                            break;
+                        case Rotate_Backward:
+                            eq = "RPS1";
+                            con = "9";
+                            move = "-4781";
+                            Send_Stage_Message(hWnd, eq, con, move);
+                            while (Send_Stage_Message == 0);
+                            Sleep(700);
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    else {
+                        MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+                    }
+                    break;
+                }
+
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -370,6 +419,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hAllmag = CreateWindow(TEXT("BUTTON"), TEXT("ALL MAG"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ALL_MAG, hInst, NULL);
         hWrintig = CreateWindow(TEXT("BUTTON"), TEXT("WRITING"), WS_CHILD | WS_VISIBLE, 130, 50, 100, 30, hWnd, (HMENU)WRITING, hInst, NULL);
         hTestwriting = CreateWindow(TEXT("BUTTON"), TEXT("TEST"), WS_CHILD | WS_VISIBLE, 130, 10, 100, 30, hWnd, (HMENU)ID_TEST, hInst, NULL);
+        hReset = CreateWindow(TEXT("BUTTON"), TEXT("RESET"), WS_CHILD | WS_VISIBLE, 130, 90, 100, 30, hWnd, (HMENU)ID_RESET, hInst, NULL);
         break;
     case WM_PAINT:
         {
