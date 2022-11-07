@@ -19,10 +19,10 @@
 #define Separate_Image 16
 #define Num_Image Split_Image*Separate_Image
 
-#define X_Forward 0b01
-#define X_Backward 0b10
-#define Rotate_Forward 0b1010
-#define Rotate_Backward 0b0101
+#define X_Forward 1
+#define X_Backward 2
+#define Rotate_Forward 3
+#define Rotate_Backward 4
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -220,7 +220,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     WCHAR szBuff[1024];
     char const *eq = "RPS1", *con = "0", *move = "10000000";
 
-    int Set_moving_stage[] = {
+    unsigned char Set_moving_stage[] = {
         X_Forward,
         Rotate_Forward,
         X_Backward,
@@ -312,7 +312,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             switch (Set_moving_stage[count])
                             {
                             case X_Forward:
-                                eq = "RPS2";
+                                eq = "RPS1";
                                 con = "9";
                                 move = "5875";
                                 Send_Stage_Message(hWnd, eq, con, move);
@@ -320,7 +320,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                 Sleep(700);
                                 break;
                             case X_Backward:
-                                eq = "RPS2";
+                                eq = "RPS1";
                                 con = "9";
                                 move = "-5875";
                                 Send_Stage_Message(hWnd, eq, con, move);
@@ -328,17 +328,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                 Sleep(700);
                                 break;
                             case Rotate_Forward:
-                                eq = "RPS1";
+                                eq = "RPS2";
                                 con = "9";
-                                move = "4781";
+                                move = "-1000";
                                 Send_Stage_Message(hWnd, eq, con, move);
                                 while (Send_Stage_Message == 0);
                                 Sleep(700);
                                 break;
                             case Rotate_Backward:
-                                eq = "RPS1";
+                                eq = "RPS2";
                                 con = "9";
-                                move = "-4781";
+                                move = "1000";
                                 Send_Stage_Message(hWnd, eq, con, move);
                                 while (Send_Stage_Message == 0);
                                 Sleep(700);
@@ -359,41 +359,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
 
             case ID_RESET:
-                for (int i = 0; i < sizeof(Set_moving_stage); i++) {
+                for (int i = 0; i < sizeof(Set_moving_stage) / sizeof(unsigned char); i++) {
                     drawing = MOVIE_WAIT;
                     SendMessage(hWnd, WM_PAINT, NULL, NULL);
                     hWnd = FindWindow(NULL, TEXT("Chamonix"));
                     if (hWnd != 0) {
-                        switch (~Set_moving_stage[count])
+                        switch (Set_moving_stage[i])
                         {
-                        case X_Forward:
-                            eq = "RPS2";
+                        case X_Backward:
+                            eq = "RPS1";
                             con = "9";
                             move = "5875";
                             Send_Stage_Message(hWnd, eq, con, move);
                             while (Send_Stage_Message == 0);
                             Sleep(700);
                             break;
-                        case X_Backward:
-                            eq = "RPS2";
+                        case X_Forward:
+                            eq = "RPS1";
                             con = "9";
                             move = "-5875";
                             Send_Stage_Message(hWnd, eq, con, move);
                             while (Send_Stage_Message == 0);
                             Sleep(700);
                             break;
-                        case Rotate_Forward:
-                            eq = "RPS1";
+                        case Rotate_Backward:
+                            eq = "RPS2";
                             con = "9";
-                            move = "4781";
+                            move = "-1000";
                             Send_Stage_Message(hWnd, eq, con, move);
                             while (Send_Stage_Message == 0);
                             Sleep(700);
                             break;
-                        case Rotate_Backward:
-                            eq = "RPS1";
+                        case Rotate_Forward:
+                            eq = "RPS2";
                             con = "9";
-                            move = "-4781";
+                            move = "1000";
                             Send_Stage_Message(hWnd, eq, con, move);
                             while (Send_Stage_Message == 0);
                             Sleep(700);
@@ -405,7 +405,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     else {
                         MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                     }
-                    break;
                 }
 
             default:
