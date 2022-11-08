@@ -413,6 +413,9 @@
   <ItemGroup>
     <ResourceCompile Include="LCOS_app.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="resource.hm" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -5,6 +5,7 @@
 #include "LCOS_app.h"
 #include <stdio.h>
 #include <string.h>
+#include <windows.h>
 
 #define MAX_LOADSTRING 100
 #define WINDOW_WIDE 400
@@ -50,6 +51,9 @@ HDC hdc_men = 0;
 HDC hdc_men_array[50];
 int w = 0, h = 0;
 int drawing = 0;
+
+//ダイアログに関して
+BOOL CALLBACK AlignmentDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 //回転、Xステージへの送信関数
 BOOL Send_Stage_Message(HWND hSSM,char const* equipment,char const* controll_num,char const* move);
@@ -244,8 +248,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DestroyWindow(hWnd);
                 break;
 
-            case ID_SEND:
-                //SENDボタンを押したときの動作
+            case ID_ALIGNMENT:
+                //ALIGNMENTボタンを押したときの動作
+                DialogBox(hInst, MAKEINTRESOURCE(ALIGNMENT_DAILOG), hWnd, (DLGPROC)AlignmentDlgProc);
+
+                /*
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
                     eq = "RPS1";
@@ -253,17 +260,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     move = "10000";
 
                     Send_Stage_Message(hWnd, eq, con, move);
-                    if (SendMessage != 0) {
-                    
-                        MessageBox(hWnd, szBuff, TEXT("Chamonixからの返答"), MB_OK);
-                    }
-                    else {
-                        MessageBox(hWnd, TEXT("False Sending message"), TEXT("Chamonixからの返答"), MB_OK);
-                    }
                 }
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                 }
+                                */
                 break;
 
             case ID_SHOW:
@@ -413,7 +414,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_CREATE:
-        hSend = CreateWindow(TEXT("BUTTON"), TEXT("SEND"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_SEND, hInst, NULL);
+        hSend = CreateWindow(TEXT("BUTTON"), TEXT("ALIGNMENT"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_ALIGNMENT, hInst, NULL);
         hShow = CreateWindow(TEXT("BUTTON"), TEXT("SHOW HPK"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
         hAllmag = CreateWindow(TEXT("BUTTON"), TEXT("ALL MAG"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ALL_MAG, hInst, NULL);
         hWrintig = CreateWindow(TEXT("BUTTON"), TEXT("WRITING"), WS_CHILD | WS_VISIBLE, 130, 50, 100, 30, hWnd, (HMENU)WRITING, hInst, NULL);
@@ -510,6 +511,57 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     return 0;
+}
+
+//ダイアログボックスの中身
+BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
+    HWND hWnd;
+    CHAR szBuf[64];
+    CHAR numchar[10];
+    size_t mojinum;
+    WCHAR numwchar[10];
+    BOOL *success=0, bSigned=0;
+    int num=0;
+    char const* eq = "RPS1", * con = "0", * move = "10000000";
+    eq = "RPS2";
+    con = "9";
+    move = "-1000";
+    
+
+    switch (msg)
+    {
+    case WM_COMMAND:
+        if (LOWORD(wp) == ALIGNMENT_CANCEL_BUTTON)
+        {
+            EndDialog(hDlog, LOWORD(wp));
+            return (INT_PTR)TRUE;
+        }
+        else if(LOWORD(wp) == ALIGNMENT_OK_BUTTON){
+            num = GetDlgItemInt(hDlog, ALIGNMENT_EDIT, success, bSigned);
+            if (&success) {
+                sprintf_s(numchar, "%d", num);
+                //mbstowcs_s(&mojinum, numwchar, sizeof(numwchar), numchar, _TRUNCATE);
+                //MessageBox(hDlog, numwchar, TEXT("確認"), MB_OK);
+                hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                if (hWnd != 0) {
+                    eq = "RPS1";
+                    con = "9";
+                    move = numchar;
+                    Send_Stage_Message(hWnd, eq, con, move);
+                }
+                else {
+                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+                }
+            }
+            else {
+                MessageBox(hDlog, TEXT("なんも入ってないと思う"), TEXT("確認"), MB_OK);
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    return FALSE;
 }
 
 BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,char const *move) {
