@@ -549,7 +549,7 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
                     while (Send_Stage_Message == 0);
                     eq = "RPS2";
                     con = "9";
-                    move = "-73500";//numchar;
+                    move = "-73500";//numchar;////
                     Send_Stage_Message(hWnd, eq, con, move);
                     while (Send_Stage_Message == 0);
                 }
