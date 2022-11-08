@@ -256,6 +256,36 @@
     <Image Include="CGH\cubic\test1\P_2.1_F.bmp">
       <Filter>リソース ファイル\cubics\test1</Filter>
     </Image>
+    <Image Include="test_picture\0.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\1.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\2.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\3.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\4.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\5.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\6.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\7.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\8.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
+    <Image Include="test_picture\9.bmp">
+      <Filter>リソース ファイル\test_num</Filter>
+    </Image>
     <Image Include="CGH\cubic\test2\cubic0_0.bmp">
       <Filter>リソース ファイル\cubics\test2</Filter>
     </Image>
@@ -831,36 +861,6 @@
     </Image>
     <Image Include="CGH\cubic\test2\cubic11_15.bmp">
       <Filter>リソース ファイル\cubics\test2</Filter>
-    </Image>
-    <Image Include="test_picture\0.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\1.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\2.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\3.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\4.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\5.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\6.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\7.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\8.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
-    </Image>
-    <Image Include="test_picture\9.bmp">
-      <Filter>リソース ファイル\test_num</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
