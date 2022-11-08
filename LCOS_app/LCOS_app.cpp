@@ -251,20 +251,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_ALIGNMENT:
                 //ALIGNMENTボタンを押したときの動作
                 DialogBox(hInst, MAKEINTRESOURCE(ALIGNMENT_DAILOG), hWnd, (DLGPROC)AlignmentDlgProc);
-
-                /*
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                    eq = "RPS1";
-                    con = "9";
-                    move = "10000";
-
-                    Send_Stage_Message(hWnd, eq, con, move);
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
-                                */
                 break;
 
             case ID_SHOW:
@@ -361,6 +347,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case ID_RESET:
                 for (int i = 0; i < sizeof(Set_moving_stage) / sizeof(unsigned char); i++) {
+                    hWnd = FindWindow(NULL, TEXT("BmpWindow"));
                     drawing = MOVIE_WAIT;
                     SendMessage(hWnd, WM_PAINT, NULL, NULL);
                     hWnd = FindWindow(NULL, TEXT("Chamonix"));
@@ -407,6 +394,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                     }
                 }
+            case ID_TEST:
+                hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                drawing = 100;
+                SendMessage(hWnd, WM_PAINT, NULL, NULL);
+                break;
 
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -517,12 +509,13 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
     HWND hWnd;
     CHAR szBuf[64];
-    CHAR numchar[10];
+    //CHAR numchar[10];
     size_t mojinum;
     WCHAR numwchar[10];
     BOOL *success=0, bSigned=0;
     int num=0;
     char const* eq = "RPS1", * con = "0", * move = "10000000";
+    char numchar[10];
     eq = "RPS2";
     con = "9";
     move = "-1000";
@@ -539,15 +532,26 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
         else if(LOWORD(wp) == ALIGNMENT_OK_BUTTON){
             num = GetDlgItemInt(hDlog, ALIGNMENT_EDIT, success, bSigned);
             if (&success) {
-                sprintf_s(numchar, "%d", num);
+                sprintf_s(numchar,10, "%d", num);                
                 //mbstowcs_s(&mojinum, numwchar, sizeof(numwchar), numchar, _TRUNCATE);
                 //MessageBox(hDlog, numwchar, TEXT("確認"), MB_OK);
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
-                    eq = "RPS1";
+                    eq = "RPS2";
                     con = "9";
-                    move = numchar;
+                    move = "-90000";//numchar;
                     Send_Stage_Message(hWnd, eq, con, move);
+                    while (Send_Stage_Message == 0);
+                    eq = "RPS2";
+                    con = "9";
+                    move = "-90000";//numchar;
+                    Send_Stage_Message(hWnd, eq, con, move);
+                    while (Send_Stage_Message == 0);
+                    eq = "RPS2";
+                    con = "9";
+                    move = "-73500";//numchar;
+                    Send_Stage_Message(hWnd, eq, con, move);
+                    while (Send_Stage_Message == 0);
                 }
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
@@ -560,9 +564,10 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
         else if (LOWORD(wp) == ALIGNMENT_INI) {
             hWnd = FindWindow(NULL, TEXT("Chamonix"));
             if (hWnd != 0) {
-                eq = "ORG1";
+                eq = "ORG2";
                 con = "9";
                 Send_Stage_Message(hWnd, eq, con, move);
+                while (Send_Stage_Message == 0);
             }
             else {
                 MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
