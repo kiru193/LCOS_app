@@ -557,6 +557,17 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
                 MessageBox(hDlog, TEXT("なんも入ってないと思う"), TEXT("確認"), MB_OK);
             }
         }
+        else if (LOWORD(wp) == ALIGNMENT_INI) {
+            hWnd = FindWindow(NULL, TEXT("Chamonix"));
+            if (hWnd != 0) {
+                eq = "ORG1";
+                con = "9";
+                Send_Stage_Message(hWnd, eq, con, move);
+            }
+            else {
+                MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            }
+        }
         break;
     default:
         break;

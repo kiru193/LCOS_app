@@ -21,9 +21,9 @@
 #define ID_TEST                         204
 #define ID_RESET                        205
 #define ALIGNMENT_EDIT                  1000
-#define CANCEL_BUTTON                   1001
 #define ALIGNMENT_CANCEL_BUTTON         1001
 #define ALIGNMENT_OK_BUTTON             1002
+#define ALIGNMENT_INI                   1005
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -33,7 +33,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        417
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1002
+#define _APS_NEXT_CONTROL_VALUE         1006
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
