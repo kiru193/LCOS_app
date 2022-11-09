@@ -16,7 +16,7 @@
 #define MOVIE_WAIT 0
 #define HPK 1
 
-#define Split_Image 12
+#define Split_Image 4
 #define Separate_Image 16
 #define Num_Image Split_Image*Separate_Image
 
@@ -290,7 +290,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     hWnd = FindWindow(NULL, TEXT("BmpWindow"));
                     drawing = i;
                     SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                    Sleep(50);
+                    Sleep(30);
                     if (i == 65 || i == 129 || i==161 || i==193) {
                         drawing = MOVIE_WAIT;
                         SendMessage(hWnd, WM_PAINT, NULL, NULL);
@@ -304,7 +304,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                 move = "5875";
                                 Send_Stage_Message(hWnd, eq, con, move);
                                 while (Send_Stage_Message == 0);
-                                Sleep(700);
+                                Sleep(1000);
                                 break;
                             case X_Backward:
                                 eq = "RPS1";
@@ -312,23 +312,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                 move = "-5875";
                                 Send_Stage_Message(hWnd, eq, con, move);
                                 while (Send_Stage_Message == 0);
-                                Sleep(700);
+                                Sleep(1000);
                                 break;
                             case Rotate_Forward:
                                 eq = "RPS2";
                                 con = "9";
-                                move = "-1000";
+                                move = "-1300";
                                 Send_Stage_Message(hWnd, eq, con, move);
                                 while (Send_Stage_Message == 0);
-                                Sleep(700);
+                                Sleep(1000);
                                 break;
                             case Rotate_Backward:
                                 eq = "RPS2";
                                 con = "9";
-                                move = "1000";
+                                move = "1300";
                                 Send_Stage_Message(hWnd, eq, con, move);
                                 while (Send_Stage_Message == 0);
-                                Sleep(700);
+                                Sleep(1000);
                                 break;
                             default:
                                 break;
@@ -438,7 +438,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     HBITMAP hBmp[200];
     BITMAP bmp_info;
 
-    TCHAR bmpname[] = TEXT("cubic10_10");
+    TCHAR bmpname[] = TEXT("cubic3_10_10");
     
     switch (message) {
     case WM_COMMAND:
@@ -474,7 +474,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         for (int i = 0; i < Split_Image; i++) {
             for (int m = 0; m < Separate_Image; m++) {
                 hdc = GetDC(hWnd);
-                wsprintf(bmpname, TEXT("cubic%d_%d"), i, m);
+                wsprintf(bmpname, TEXT("CUBIC3_%d_%d"), i, m);
                 hBmp[MOVIE_START + Separate_Image * i + m] = LoadBitmap(hInst, bmpname);
                 hdc_men_array[MOVIE_START + 16 * i + m] = CreateCompatibleDC(hdc);
                 SelectObject(hdc_men_array[MOVIE_START + Separate_Image * i + m], hBmp[MOVIE_START + Separate_Image * i + m]);
