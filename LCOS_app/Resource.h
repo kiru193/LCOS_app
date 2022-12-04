@@ -16,7 +16,7 @@
 #define IDB_BITMAP2                     130
 #define ID_ALIGNMENT                    200
 #define ID_SHOW                         201
-#define ALL_MAG                         202
+#define ID_OPEN                         202
 #define WRITING                         203
 #define ID_TEST                         204
 #define ID_RESET                        205

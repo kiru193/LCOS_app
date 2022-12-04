@@ -139,12 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CSerial.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="LCOS_app.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CSerial.cpp" />
     <ClCompile Include="LCOS_app.cpp" />
   </ItemGroup>
   <ItemGroup>

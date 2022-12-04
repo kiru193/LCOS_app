@@ -3,9 +3,12 @@
 
 #include "framework.h"
 #include "LCOS_app.h"
+#include "CSerial.h"
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
+#include <winusb.h>
+#include <process.h>
 
 #define MAX_LOADSTRING 100
 #define WINDOW_WIDE 400
@@ -220,7 +223,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend, hShow, hAllmag, hWrintig, hTestwriting, hReset;
+    static HWND hSend, hShow, hShutter, hWrintig, hTestwriting, hReset;
     static HWND hShow2;
 
     HBITMAP hBmp[200];
@@ -228,6 +231,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     WCHAR szBuff[1024];
     char const *eq = "RPS1", *con = "0", *move = "10000000";
+
+    CSerial usb_serial;
+    DCB dcb;
+    dcb.BaudRate = 9600; // 速度
+    dcb.ByteSize = 8; // データ長
+    dcb.Parity = NOPARITY; // パリティ
+    dcb.StopBits = ONESTOPBIT; // ストップビット長
+    dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+    dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+    TCHAR buffer[10] = TEXT("OPEN:1");
 
     unsigned char Set_moving_stage[] = {
         X_Forward,
@@ -264,30 +277,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 drawing = HPK;
                 SendMessage(hWnd, WM_PAINT, NULL, NULL);
                 break;
-            case ALL_MAG:
+            case ID_OPEN:
+                //OPENボタンを押したときの動作
+                usb_serial.Start("COM1", &dcb);
+                usb_serial.SendData(buffer, 6);
 
-                //ALL MAGボタンを押したときの動作
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                    eq = "RPS2";//RPS"2"この2が動作させる機器の番号に対応する。（CharmonixやCRUXを見ればどちらが何番かがわかるはず。）
-                    con = "0";//Charmonix内のSystemに保存されている速度テーブルの選択番号
-                    //以下番号要約
-                    //0：タイリング法における最適値（とりあえず）
-                    //1～8:予約（必要になり次第、登録すること）
-                    //9：自由に変えてよい値、テスト、試験用
-                    move = "90000";//これで半回転　入力可能な値は5桁の数字まで、6桁の数字を入力すると一の位が省略された数字が入力されたと判断され動作する。
-                    Send_Stage_Message(hWnd, eq, con, move);
-                    while (Send_Stage_Message == 0);
-                    Send_Stage_Message(hWnd, "RPS2", "9", "900");
-                    while (Send_Stage_Message == 0);
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
+
                 break;
-
             case WRITING:
                 //WRITINGボタンを押したときの動作
+
                 for (int a = 0; a < 4; a++) {
                     Control_Stage_and_image(hWnd, 3, 10000);
                     Control_Stage_and_image(hWnd, 3 + Split_Image * Separate_Image, 10000);
@@ -453,6 +452,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
 
             case ID_RESET:
+                hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                if (hWnd != 0) {
+                    eq = "RPS2";//RPS"2"この2が動作させる機器の番号に対応する。（CharmonixやCRUXを見ればどちらが何番かがわかるはず。）
+                    con = "0";//Charmonix内のSystemに保存されている速度テーブルの選択番号
+                    //以下番号要約
+                    //0：タイリング法における最適値（とりあえず）
+                    //1～8:予約（必要になり次第、登録すること）
+                    //9：自由に変えてよい値、テスト、試験用
+                    move = "90000";//これで半回転　入力可能な値は5桁の数字まで、6桁の数字を入力すると一の位が省略された数字が入力されたと判断され動作する。
+                    Send_Stage_Message(hWnd, eq, con, move);
+                    while (Send_Stage_Message == 0);
+                    Send_Stage_Message(hWnd, "RPS2", "9", "900");
+                    while (Send_Stage_Message == 0);
+                }
+                else {
+                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+                }
+                break;
+
+
                 for (int i = 0; i < sizeof(Set_moving_stage) / sizeof(unsigned char); i++) {
                     hWnd = FindWindow(NULL, TEXT("BmpWindow"));
                     drawing = MOVIE_WAIT;
@@ -503,7 +522,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("ALIGNMENT"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_ALIGNMENT, hInst, NULL);
         hShow = CreateWindow(TEXT("BUTTON"), TEXT("SHOW HPK"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
-        hAllmag = CreateWindow(TEXT("BUTTON"), TEXT("ALL MAG"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ALL_MAG, hInst, NULL);
+        hShutter = CreateWindow(TEXT("BUTTON"), TEXT("OPEN"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ID_OPEN, hInst, NULL);
         hWrintig = CreateWindow(TEXT("BUTTON"), TEXT("WRITING"), WS_CHILD | WS_VISIBLE, 130, 50, 100, 30, hWnd, (HMENU)WRITING, hInst, NULL);
         hTestwriting = CreateWindow(TEXT("BUTTON"), TEXT("TEST"), WS_CHILD | WS_VISIBLE, 130, 10, 100, 30, hWnd, (HMENU)ID_TEST, hInst, NULL);
         hReset = CreateWindow(TEXT("BUTTON"), TEXT("RESET"), WS_CHILD | WS_VISIBLE, 130, 90, 100, 30, hWnd, (HMENU)ID_RESET, hInst, NULL);
