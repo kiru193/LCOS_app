@@ -30,12 +30,12 @@ void CSerial::Start(LPCSTR comPortName, DCB* portConfig)
 
     // 指定ポートを開く
     mHComPort = CreateFile(
-        (LPCTSTR)comPortName,
+        TEXT("COM8"),
         GENERIC_READ | GENERIC_WRITE,               // 読み書きを指定
         0,
         NULL,
         OPEN_EXISTING,
-        0,
+        FILE_ATTRIBUTE_NORMAL,
         NULL);
 
     if (mHComPort != INVALID_HANDLE_VALUE)
@@ -43,7 +43,7 @@ void CSerial::Start(LPCSTR comPortName, DCB* portConfig)
         // ポートのボーレート、パリティ等を設定
         nBret = SetCommState(mHComPort, portConfig);
     }
-
+    
     if (nBret != FALSE)
     {
         mThreadId = (HANDLE)_beginthreadex(
@@ -54,6 +54,7 @@ void CSerial::Start(LPCSTR comPortName, DCB* portConfig)
             0,
             NULL);
     }
+    
 }
 
 void CSerial::End()
@@ -110,20 +111,23 @@ DWORD CSerial::GetRecvData(LPVOID buffer)
     return length;
 }
 
-DWORD CSerial::SendData(LPVOID buffer, int toWriteBytes)
+DWORD CSerial::SendData(HWND hWnd, LPVOID buffer, int toWriteBytes)
 {
     DWORD writeBytes;
     DWORD index = 0;
+    
 
     // 指定されたデータを全て書き込む為にループを廻す
     while (toWriteBytes > 0)
     {
-        WriteFile(
+        if (WriteFile(
             mHComPort,
-            ((BYTE*)buffer) + index,
+            "OPEN:1\r\n",
             toWriteBytes,
             &writeBytes,
-            NULL);
+            NULL) == FALSE) {
+            MessageBox(hWnd, TEXT("ERROR"), TEXT("ERROR"), MB_OK);
+        }
         index += writeBytes;
         toWriteBytes -= writeBytes;
     }

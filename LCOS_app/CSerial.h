@@ -22,7 +22,7 @@ public:
     DWORD GetRecvData(LPVOID buffer);
 
     // buffer に格納されたデータを length バイト送信する
-    DWORD SendData(LPVOID buffer, int toWriteBytes);
+    DWORD SendData(HWND hWnd,LPVOID buffer, int toWriteBytes);
 
 private:
     HANDLE mHComPort;           // COM ポート用ハンドル

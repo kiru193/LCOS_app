@@ -61,7 +61,7 @@ BOOL CALLBACK AlignmentDlgProc(HWND, UINT, WPARAM, LPARAM);
 //回転、Xステージへの送信関数
 BOOL Send_Stage_Message(HWND hSSM,char const* equipment,char const* controll_num,char const* move);
 //ステージコントロールと画像表示の為の関数
-void Control_Stage_and_image(HWND hWnd,int bitmap_num,int movement);
+void Control_Stage_and_image(HWND hWnd,HANDLE hPort,int bitmap_num,int movement);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -233,14 +233,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     char const *eq = "RPS1", *con = "0", *move = "10000000";
 
     CSerial usb_serial;
+    HANDLE hPort;
+    LPCSTR str = "OPEN:1\r\n";
+    BYTE bSendBuffer[10] = "OPEN:1\r\n";
+    DWORD dwSendSize = 10;
+    COMSTAT Comstat;
+    DWORD dwErrorMask;            
+    BOOL Ret;
     DCB dcb;
-    dcb.BaudRate = 9600; // 速度
-    dcb.ByteSize = 8; // データ長
-    dcb.Parity = NOPARITY; // パリティ
-    dcb.StopBits = ONESTOPBIT; // ストップビット長
-    dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
-    dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
-    TCHAR buffer[10] = TEXT("OPEN:1");
+    COMMTIMEOUTS timeout;
+
+
 
     unsigned char Set_moving_stage[] = {
         X_Forward,
@@ -253,45 +256,196 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        // 選択されたメニューの解析:
+        switch (wmId)
         {
-            int wmId = LOWORD(wParam);
-            // 選択されたメニューの解析:
-            switch (wmId)
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+
+        case ID_ALIGNMENT:
+            //ALIGNMENTボタンを押したときの動作
+            DialogBox(hInst, MAKEINTRESOURCE(ALIGNMENT_DAILOG), hWnd, (DLGPROC)AlignmentDlgProc);
+            break;
+
+        case ID_SHOW:
+            //SHOWボタンを押したときの動作
+            hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+            drawing = HPK;
+            SendMessage(hWnd, WM_PAINT, NULL, NULL);
+            break;
+        case ID_OPEN:
+            //OPENボタンを押したときの動作
+/*                HANDLE hPort;
+                hPort = CreateFile(TEXT("COM8"),
+                    GENERIC_READ | GENERIC_WRITE,               // 読み書きを指定
+                    0,
+                    NULL,
+                    OPEN_EXISTING,
+                    FILE_ATTRIBUTE_NORMAL,
+                    NULL);
+                if (hPort == INVALID_HANDLE_VALUE) {
+                    MessageBox(hWnd, TEXT("???"), TEXT("エラー"), MB_OK);
+                }
+                */
+            hPort = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            if (hPort == INVALID_HANDLE_VALUE) {
+                MessageBox(hWnd, TEXT("COM8はないです。"), TEXT("エラー"), MB_OK);
+                break;
+            }
+
+            Ret = SetupComm(hPort, 1024, 1024);
+            if (Ret == FALSE) {
+                MessageBox(hWnd, TEXT("Setupに失敗しました"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
+                break;
+            }
+            Ret = PurgeComm(hPort, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
+            if (Ret == FALSE) {
+                MessageBox(hWnd, TEXT("Clearに失敗しました"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
+                break;
+            }
+
+            dcb.BaudRate = 9600; // 速度
+            dcb.ByteSize = 8; // データ長
+            dcb.Parity = NOPARITY; // パリティ
+            dcb.StopBits = ONESTOPBIT; // ストップビット長
+            dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+            dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+
+            timeout.ReadIntervalTimeout = 500;
+            timeout.ReadTotalTimeoutMultiplier = 0;
+            timeout.ReadTotalTimeoutConstant = 500;
+
+            timeout.WriteTotalTimeoutMultiplier = 0;
+            timeout.WriteTotalTimeoutConstant = 500;
+
+            Ret = SetCommTimeouts(hPort, &timeout);
+
+            if (Ret == FALSE)
             {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+                MessageBox(hWnd, TEXT("SetTimeoutに失敗しました。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
                 break;
+            }
 
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
+            str = "GC\r\n";
+            for (int i = 0; i < strlen(str); i++) {
+                Ret = WriteFile(hPort, &str[i], 1, &dwSendSize, NULL);
+                if (Ret == FALSE) {
+                    MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
+                    CloseHandle(hPort);
+                    break;
+                }
+            }
+            Sleep(1000);
+            str = "\r\nOPEN:1\r\n";
+            Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
+            if (Ret == FALSE) {
+                MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
                 break;
-
-            case ID_ALIGNMENT:
-                //ALIGNMENTボタンを押したときの動作
-                DialogBox(hInst, MAKEINTRESOURCE(ALIGNMENT_DAILOG), hWnd, (DLGPROC)AlignmentDlgProc);
+            }
+            Sleep(2000);
+            str = "\r\nCLOSE:1\r\n";
+            Ret = WriteFile(hPort, str, 12, &dwSendSize, NULL);
+            if (Ret == FALSE) {
+                MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
                 break;
+            }
+            //usb_serial.Start("COM8", &dcb);
+             //buffer = "OPEN:1\r\n";
+             //usb_serial.SendData(hWnd,&buffer, 1);
+             //usb_serial.GetRecvData(&receive);
+             //MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            CloseHandle(hPort);
 
-            case ID_SHOW:
-                //SHOWボタンを押したときの動作
-                hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                drawing = HPK;
-                SendMessage(hWnd, WM_PAINT, NULL, NULL);
+            break;
+        case WRITING:
+            //WRITINGボタンを押したときの動作
+            hPort = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            if (hPort == INVALID_HANDLE_VALUE) {
+                MessageBox(hWnd, TEXT("COM8はないです。"), TEXT("エラー"), MB_OK);
                 break;
-            case ID_OPEN:
-                //OPENボタンを押したときの動作
-                usb_serial.Start("COM1", &dcb);
-                usb_serial.SendData(buffer, 6);
+            }
 
-
+            Ret = SetupComm(hPort, 1024, 1024);
+            if (Ret == FALSE) {
+                MessageBox(hWnd, TEXT("Setupに失敗しました"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
                 break;
-            case WRITING:
-                //WRITINGボタンを押したときの動作
+            }
+            Ret = PurgeComm(hPort, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
+            if (Ret == FALSE) {
+                MessageBox(hWnd, TEXT("Clearに失敗しました"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
+                break;
+            }
 
-                for (int a = 0; a < 4; a++) {
-                    Control_Stage_and_image(hWnd, 3, 10000);
-                    Control_Stage_and_image(hWnd, 3 + Split_Image * Separate_Image, 10000);
-                    Control_Stage_and_image(hWnd, 3 + Split_Image * Separate_Image * 2, 10000);
-                    Control_Stage_and_image(hWnd, 3 + Split_Image * Separate_Image * 3, 10000);
+            dcb.BaudRate = 9600; // 速度
+            dcb.ByteSize = 8; // データ長
+            dcb.Parity = NOPARITY; // パリティ
+            dcb.StopBits = ONESTOPBIT; // ストップビット長
+            dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+            dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+
+            timeout.ReadIntervalTimeout = 500;
+            timeout.ReadTotalTimeoutMultiplier = 0;
+            timeout.ReadTotalTimeoutConstant = 500;
+
+            timeout.WriteTotalTimeoutMultiplier = 0;
+            timeout.WriteTotalTimeoutConstant = 500;
+
+            Ret = SetCommTimeouts(hPort, &timeout);
+
+            if (Ret == FALSE)
+            {
+                MessageBox(hWnd, TEXT("SetTimeoutに失敗しました。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
+                break;
+            }
+
+            str = "GC\r\n";
+            for (int i = 0; i < strlen(str); i++) {
+                Ret = WriteFile(hPort, &str[i], 1, &dwSendSize, NULL);
+                if (Ret == FALSE) {
+                    MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
+                    CloseHandle(hPort);
+                    break;
+                }
+            }
+
+            str = "\r\nOPEN:1\r\n";
+            Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
+            if (Ret == FALSE) {
+                MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
+                break;
+            }
+
+            hWnd = FindWindow(NULL, TEXT("Chamonix"));
+            if (hWnd != 0) {
+                Send_Stage_Message(hWnd, "RPS2", "9", "30000");
+                while (Send_Stage_Message == 0);
+            }
+            else {
+                MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            }
+
+
+                for (int a = 0; a <1 ; a++) {
+                    Control_Stage_and_image(hWnd, hPort, 3, 10000);
+                    Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image, 10000);
+                    Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 2, 10000);
+                    Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 3, 10000);
                     /*                    for (int i = 0; i < Split_Image; i++) {
                                             for (int m = 0; m < Separate_Image; m++) {
                                                 hdc = GetDC(hWnd);
@@ -437,6 +591,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                     */
                 }
+
+
+
+                hWnd = FindWindow(NULL, TEXT("Chamonix"));
+                if (hWnd != 0) {
+                    Send_Stage_Message(hWnd, "RPS2", "9", "90000");
+                    while (Send_Stage_Message == 0);
+                }
+                else {
+                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+                }
+
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
                     Send_Stage_Message(hWnd, "RPS2", "9", "20000");
@@ -448,76 +614,77 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 drawing = MOVIE_END;
                 SendMessage(hWnd, WM_PAINT, NULL, NULL);
-               
+                CloseHandle(hPort);
                 break;
 
-            case ID_RESET:
+        case ID_RESET:
+            hWnd = FindWindow(NULL, TEXT("Chamonix"));
+            if (hWnd != 0) {
+                eq = "RPS2";//RPS"2"この2が動作させる機器の番号に対応する。（CharmonixやCRUXを見ればどちらが何番かがわかるはず。）
+                con = "0";//Charmonix内のSystemに保存されている速度テーブルの選択番号
+                //以下番号要約
+                //0：タイリング法における最適値（とりあえず）
+                //1～8:予約（必要になり次第、登録すること）
+                //9：自由に変えてよい値、テスト、試験用
+                move = "90000";//これで半回転　入力可能な値は5桁の数字まで、6桁の数字を入力すると一の位が省略された数字が入力されたと判断され動作する。
+                Send_Stage_Message(hWnd, eq, con, move);
+                while (Send_Stage_Message == 0);
+                Send_Stage_Message(hWnd, "RPS2", "9", "900");
+                while (Send_Stage_Message == 0);
+            }
+            else {
+                MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            }
+            break;
+
+
+            for (int i = 0; i < sizeof(Set_moving_stage) / sizeof(unsigned char); i++) {
+                hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+                drawing = MOVIE_WAIT;
+                SendMessage(hWnd, WM_PAINT, NULL, NULL);
                 hWnd = FindWindow(NULL, TEXT("Chamonix"));
                 if (hWnd != 0) {
-                    eq = "RPS2";//RPS"2"この2が動作させる機器の番号に対応する。（CharmonixやCRUXを見ればどちらが何番かがわかるはず。）
-                    con = "0";//Charmonix内のSystemに保存されている速度テーブルの選択番号
-                    //以下番号要約
-                    //0：タイリング法における最適値（とりあえず）
-                    //1～8:予約（必要になり次第、登録すること）
-                    //9：自由に変えてよい値、テスト、試験用
-                    move = "90000";//これで半回転　入力可能な値は5桁の数字まで、6桁の数字を入力すると一の位が省略された数字が入力されたと判断され動作する。
-                    Send_Stage_Message(hWnd, eq, con, move);
-                    while (Send_Stage_Message == 0);
-                    Send_Stage_Message(hWnd, "RPS2", "9", "900");
-                    while (Send_Stage_Message == 0);
+                    switch (Set_moving_stage[i])
+                    {
+                    case X_Backward:
+                        Send_Stage_Message(hWnd, "RPS1", "9", "5875");
+                        while (Send_Stage_Message == 0);
+                        Sleep(700);
+                        break;
+                    case X_Forward:
+                        Send_Stage_Message(hWnd, "RPS1", "9", "-5875");
+                        while (Send_Stage_Message == 0);
+                        Sleep(700);
+                        break;
+                    case Rotate_Backward:
+                        Send_Stage_Message(hWnd, "RPS2", "9", "-1000");
+                        while (Send_Stage_Message == 0);
+                        Sleep(700);
+                        break;
+                    case Rotate_Forward:
+                        Send_Stage_Message(hWnd, "RPS2", "9", "1000");
+                        while (Send_Stage_Message == 0);
+                        Sleep(700);
+                        break;
+                    default:
+                        break;
+                    }
                 }
                 else {
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                 }
-                break;
+            }
+        case ID_TEST:
+            hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+            drawing = 100;
+            SendMessage(hWnd, WM_PAINT, NULL, NULL);
+            break;
 
-
-                for (int i = 0; i < sizeof(Set_moving_stage) / sizeof(unsigned char); i++) {
-                    hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                    drawing = MOVIE_WAIT;
-                    SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                    hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                    if (hWnd != 0) {
-                        switch (Set_moving_stage[i])
-                        {
-                        case X_Backward:
-                            Send_Stage_Message(hWnd, "RPS1", "9", "5875");
-                            while (Send_Stage_Message == 0);
-                            Sleep(700);
-                            break;
-                        case X_Forward:
-                            Send_Stage_Message(hWnd, "RPS1", "9","-5875");
-                            while (Send_Stage_Message == 0);
-                            Sleep(700);
-                            break;
-                        case Rotate_Backward:
-                            Send_Stage_Message(hWnd, "RPS2", "9", "-1000");
-                            while (Send_Stage_Message == 0);
-                            Sleep(700);
-                            break;
-                        case Rotate_Forward:
-                            Send_Stage_Message(hWnd, "RPS2", "9","1000");
-                            while (Send_Stage_Message == 0);
-                            Sleep(700);
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-                    else {
-                        MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                    }
-                }
-            case ID_TEST:
-                hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                drawing = 100;
-                SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                break;
-
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
+    
         break;
     case WM_CREATE:
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("ALIGNMENT"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_ALIGNMENT, hInst, NULL);
@@ -684,11 +851,14 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
 }
 
 //ステージコントロールと画像表示の為の関数
-void Control_Stage_and_image(HWND hWnd,int bitmap_num, int movement) {
+void Control_Stage_and_image(HWND hWnd, HANDLE hPort,int bitmap_num, int movement) {
     HBITMAP hBmp[200];
     TCHAR bmpname[] = TEXT("cubic3_10_10AA");
     HDC hdc;
     char move[10];
+    BOOL Ret;
+    LPCSTR str = "OPEN:1\r\n";
+    DWORD dwSendSize = 10;
 
     //bitmapの読み込み
     for (int i = 0; i < Split_Image; i++) {
@@ -715,6 +885,10 @@ void Control_Stage_and_image(HWND hWnd,int bitmap_num, int movement) {
     drawing = MOVIE_WAIT;
     SendMessage(hWnd, WM_PAINT, NULL, NULL);
 
+    //シャッターのクローズ
+    str = "\r\nCLOSE:1\r\n";
+    Ret = WriteFile(hPort, str, 12, &dwSendSize, NULL);
+
     //ステージのコントロール
     hWnd = FindWindow(NULL, TEXT("Chamonix"));
     if (hWnd != 0) {
@@ -725,6 +899,11 @@ void Control_Stage_and_image(HWND hWnd,int bitmap_num, int movement) {
     else {
         MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
     }
+
+    //シャッターオープン
+    Sleep(2000);
+    str = "\r\nOPEN:1\r\n";
+    Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
 
 }
 
