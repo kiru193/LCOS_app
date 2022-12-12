@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <winusb.h>
 #include <process.h>
+#include <iostream>
 
 #define MAX_LOADSTRING 100
 #define WINDOW_WIDE 400
@@ -28,6 +29,7 @@
 #define Rotate_Forward 3
 #define Rotate_Backward 4
 
+using namespace std;
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
@@ -282,18 +284,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_OPEN:
             //OPENボタンを押したときの動作
-/*                HANDLE hPort;
-                hPort = CreateFile(TEXT("COM8"),
-                    GENERIC_READ | GENERIC_WRITE,               // 読み書きを指定
-                    0,
-                    NULL,
-                    OPEN_EXISTING,
-                    FILE_ATTRIBUTE_NORMAL,
-                    NULL);
-                if (hPort == INVALID_HANDLE_VALUE) {
-                    MessageBox(hWnd, TEXT("???"), TEXT("エラー"), MB_OK);
-                }
-                */
             hPort = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if (hPort == INVALID_HANDLE_VALUE) {
                 MessageBox(hWnd, TEXT("COM8はないです。"), TEXT("エラー"), MB_OK);
@@ -328,45 +318,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             timeout.WriteTotalTimeoutConstant = 500;
 
             Ret = SetCommTimeouts(hPort, &timeout);
-
-            if (Ret == FALSE)
-            {
-                MessageBox(hWnd, TEXT("SetTimeoutに失敗しました。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hPort);
-                break;
-            }
-
-            str = "GC\r\n";
-            for (int i = 0; i < strlen(str); i++) {
-                Ret = WriteFile(hPort, &str[i], 1, &dwSendSize, NULL);
-                if (Ret == FALSE) {
-                    MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
-                    CloseHandle(hPort);
-                    break;
-                }
-            }
-            Sleep(1000);
-            str = "\r\nOPEN:1\r\n";
-            Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
-            if (Ret == FALSE) {
-                MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hPort);
-                break;
-            }
-            Sleep(2000);
-            str = "\r\nCLOSE:1\r\n";
-            Ret = WriteFile(hPort, str, 12, &dwSendSize, NULL);
-            if (Ret == FALSE) {
-                MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hPort);
-                break;
-            }
-            //usb_serial.Start("COM8", &dcb);
-             //buffer = "OPEN:1\r\n";
-             //usb_serial.SendData(hWnd,&buffer, 1);
-             //usb_serial.GetRecvData(&receive);
-             //MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-            CloseHandle(hPort);
 
             break;
         case WRITING:
@@ -374,6 +325,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             hPort = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if (hPort == INVALID_HANDLE_VALUE) {
                 MessageBox(hWnd, TEXT("COM8はないです。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
                 break;
             }
 
@@ -431,6 +383,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             }
 
+            //動作に関して↓
+            CloseHandle(hPort);
+            hPort = CreateFile(L"COM1", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            if (hPort == INVALID_HANDLE_VALUE) {
+                MessageBox(hWnd, TEXT("COM1はないです。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
+                break;
+            }
+
+            dcb.BaudRate = 9600; // 速度
+            dcb.ByteSize = 8; // データ長
+            dcb.Parity = NOPARITY; // パリティ
+            dcb.StopBits = ONESTOPBIT; // ストップビット長
+            dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+            dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+            dcb.EofChar = 0x03;
+            dcb.EvtChar = 0x02;
+
+            str = "RPG2/9/30000/0\r\n";
+            Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
+            if (Ret == FALSE) {
+                MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hPort);
+                break;
+            }
+
+            /*
             hWnd = FindWindow(NULL, TEXT("Chamonix"));
             if (hWnd != 0) {
                 Send_Stage_Message(hWnd, "RPS2", "9", "30000");
@@ -439,183 +418,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             else {
                 MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
             }
-
-
-                for (int a = 0; a <1 ; a++) {
-                    Control_Stage_and_image(hWnd, hPort, 3, 10000);
-                    Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image, 10000);
-                    Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 2, 10000);
-                    Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 3, 10000);
-                    /*                    for (int i = 0; i < Split_Image; i++) {
-                                            for (int m = 0; m < Separate_Image; m++) {
-                                                hdc = GetDC(hWnd);
-                                                wsprintf(bmpname, TEXT("IDB_BITMAP%d"), 3 + m + i * Separate_Image);//TEXT("MOVIE1_%d_%d"), i, m);
-                                                int imagenum = MOVIE_START + Separate_Image * i + m;
-                                                hBmp[imagenum] = LoadBitmap(hInst, bmpname);
-                                                hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
-                                                SelectObject(hdc_men_array[imagenum], hBmp[imagenum]);
-                                                ReleaseDC(hWnd, hdc);
-                                            }
-                                        }
-                                        Sleep(1000);
-
-                                        for (int i = MOVIE_START; i < MOVIE_START + Split_Image * Separate_Image; i++) {
-                                            hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                                            drawing = i;
-                                            SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                                            Sleep(40);
-                                        }
-
-                                        drawing = MOVIE_WAIT;
-                                        SendMessage(hWnd, WM_PAINT, NULL, NULL);
-
-                                        hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                                        if (hWnd != 0) {
-                                            eq = "RPS2";
-                                            con = "9";
-                                            move = "10000";
-                                            Send_Stage_Message(hWnd, eq, con, move);
-                                            while (Send_Stage_Message == 0);
-                                        }
-                                        else {
-                                            MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                                        }
-
-
-                                        for (int i = 0; i < Split_Image; i++) {
-                                            for (int m = 0; m < Separate_Image; m++) {
-                                                hdc = GetDC(hWnd);
-                                                wsprintf(bmpname, TEXT("IDB_BITMAP%d"), 3 + m + i * Separate_Image + Separate_Image * Split_Image);
-                                                int imagenum = MOVIE_START + Separate_Image * i + m;
-                                                hBmp[imagenum] = LoadBitmap(hInst, bmpname);
-                                                hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
-                                                SelectObject(hdc_men_array[imagenum], hBmp[imagenum]);
-                                                ReleaseDC(hWnd, hdc);
-                                            }
-                                        }
-                                        Sleep(1000);
-
-                                        for (int i = MOVIE_START; i < MOVIE_START + Split_Image * Separate_Image; i++) {
-                                            hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                                            drawing = i;
-                                            SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                                            Sleep(40);
-                                        }
-
-                                        drawing = MOVIE_WAIT;
-                                        SendMessage(hWnd, WM_PAINT, NULL, NULL);
-
-                                        hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                                        if (hWnd != 0) {
-                                            eq = "RPS2";
-                                            con = "9";
-                                            move = "10000";
-                                            Send_Stage_Message(hWnd, eq, con, move);
-                                            while (Send_Stage_Message == 0);
-                                        }
-                                        else {
-                                            MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                                        }
-
-
-                                        for (int i = 0; i < Split_Image; i++) {
-                                            for (int m = 0; m < Separate_Image; m++) {
-                                                hdc = GetDC(hWnd);
-                                                wsprintf(bmpname, TEXT("IDB_BITMAP%d"), 3 + m + i * Separate_Image + 2 * Separate_Image * Split_Image);
-                                                int imagenum = MOVIE_START + Separate_Image * i + m;
-                                                hBmp[imagenum] = LoadBitmap(hInst, bmpname);
-                                                hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
-                                                SelectObject(hdc_men_array[imagenum], hBmp[imagenum]);
-                                                ReleaseDC(hWnd, hdc);
-                                            }
-                                        }
-                                        Sleep(1000);
-
-                                        for (int i = MOVIE_START; i < MOVIE_START + Split_Image * Separate_Image; i++) {
-                                            hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                                            drawing = i;
-                                            SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                                            Sleep(40);
-                                        }
-
-                                        drawing = MOVIE_WAIT;
-                                        SendMessage(hWnd, WM_PAINT, NULL, NULL);
-
-                                        hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                                        if (hWnd != 0) {
-                                            eq = "RPS2";
-                                            con = "9";
-                                            move = "10000";
-                                            Send_Stage_Message(hWnd, eq, con, move);
-                                            while (Send_Stage_Message == 0);
-                                        }
-                                        else {
-                                            MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                                        }
-
-
-                                        for (int i = 0; i < Split_Image; i++) {
-                                            for (int m = 0; m < Separate_Image; m++) {
-                                                hdc = GetDC(hWnd);
-                                                wsprintf(bmpname, TEXT("IDB_BITMAP%d"), 3 + m + i * Separate_Image + 3 * Separate_Image * Split_Image);
-                                                int imagenum = MOVIE_START + Separate_Image * i + m;
-                                                hBmp[imagenum] = LoadBitmap(hInst, bmpname);
-                                                hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
-                                                SelectObject(hdc_men_array[imagenum], hBmp[imagenum]);
-                                                ReleaseDC(hWnd, hdc);
-                                            }
-                                        }
-                                        Sleep(1000);
-
-                                        for (int i = MOVIE_START; i < MOVIE_START + Split_Image * Separate_Image; i++) {
-                                            hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                                            drawing = i;
-                                            SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                                            Sleep(40);
-                                        }
-
-                                        drawing = MOVIE_WAIT;
-                                        SendMessage(hWnd, WM_PAINT, NULL, NULL);
-
-                                        hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                                        if (hWnd != 0) {
-                                            eq = "RPS2";
-                                            con = "9";
-                                            move = "10000";
-                                            Send_Stage_Message(hWnd, eq, con, move);
-                                            while (Send_Stage_Message == 0);
-                                        }
-                                        else {
-                                            MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                                        }
-
-                    */
-                }
+            */
+            for (int a = 0; a <1 ; a++) {
+                Control_Stage_and_image(hWnd, hPort, 3, 10000);
+                Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image, 10000);
+                Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 2, 10000);
+                Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 3, 10000);
+            }
 
 
 
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                    Send_Stage_Message(hWnd, "RPS2", "9", "90000");
-                    while (Send_Stage_Message == 0);
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
+            hWnd = FindWindow(NULL, TEXT("Chamonix"));
+            if (hWnd != 0) {
+                Send_Stage_Message(hWnd, "RPS2", "9", "90000");
+                while (Send_Stage_Message == 0);
+            }
+            else {
+            MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            }
 
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                    Send_Stage_Message(hWnd, "RPS2", "9", "20000");
-                    while (Send_Stage_Message == 0);
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
+            hWnd = FindWindow(NULL, TEXT("Chamonix"));
+            if (hWnd != 0) {
+                Send_Stage_Message(hWnd, "RPS2", "9", "20000");
+                while (Send_Stage_Message == 0);
+            }
+            else {
+                MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            }
 
-                drawing = MOVIE_END;
-                SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                CloseHandle(hPort);
-                break;
+            drawing = MOVIE_END;
+            SendMessage(hWnd, WM_PAINT, NULL, NULL);
+            CloseHandle(hPort);
+            break;
 
         case ID_RESET:
             hWnd = FindWindow(NULL, TEXT("Chamonix"));
