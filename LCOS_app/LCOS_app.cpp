@@ -322,6 +322,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case WRITING:
             //WRITINGボタンを押したときの動作
+            
+            /*
             hPort = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if (hPort == INVALID_HANDLE_VALUE) {
                 MessageBox(hWnd, TEXT("COM8はないです。"), TEXT("エラー"), MB_OK);
@@ -348,6 +350,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             dcb.StopBits = ONESTOPBIT; // ストップビット長
             dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
             dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+            dcb.EofChar = 0x03;
+            dcb.EvtChar = 0x02;
 
             timeout.ReadIntervalTimeout = 500;
             timeout.ReadTotalTimeoutMultiplier = 0;
@@ -382,12 +386,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 CloseHandle(hPort);
                 break;
             }
+            *///シャッターに関して
 
             //動作に関して↓
-            CloseHandle(hPort);
-            hPort = CreateFile(L"COM1", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            //CloseHandle(hPort);
+            hPort = CreateFile(L"COM5", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if (hPort == INVALID_HANDLE_VALUE) {
-                MessageBox(hWnd, TEXT("COM1はないです。"), TEXT("エラー"), MB_OK);
+                MessageBox(hWnd, TEXT("COM5はないです。"), TEXT("エラー"), MB_OK);
                 CloseHandle(hPort);
                 break;
             }
@@ -401,14 +406,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             dcb.EofChar = 0x03;
             dcb.EvtChar = 0x02;
 
-            str = "RPG2/9/30000/0\r\n";
-            Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
+            SetCommState(hPort, &dcb);
+
+            str = "\r\n\x02RPS2/9/30000/1\r\n";
+            Ret = WriteFile(hPort, str, 21, &dwSendSize, NULL);
             if (Ret == FALSE) {
                 MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
                 CloseHandle(hPort);
                 break;
             }
-
+            Sleep(1000);
+            CloseHandle(hPort);
+            break;
             /*
             hWnd = FindWindow(NULL, TEXT("Chamonix"));
             if (hWnd != 0) {
