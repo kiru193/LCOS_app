@@ -62,8 +62,11 @@ BOOL CALLBACK AlignmentDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 //回転、Xステージへの送信関数
 BOOL Send_Stage_Message(HWND hSSM,char const* equipment,char const* controll_num,char const* move);
+BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equipment, const char* controll_num, const char* move);
+
 //ステージコントロールと画像表示の為の関数
-void Control_Stage_and_image(HWND hWnd,HANDLE hPort,int bitmap_num,int movement);
+void Control_Stage_and_image(HWND hWnd, HANDLE hPort, int bitmap_num, int movement);
+BOOL Control_Stage_and_image(HWND hWnd, DCB dcb,HANDLE hPort, int bitmap_num, const char* move);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -236,7 +239,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     CSerial usb_serial;
     HANDLE hPort;
-    LPCSTR str = "OPEN:1\r\n";
+    const char* str = "OPEN:1\r\n";
     BYTE bSendBuffer[10] = "OPEN:1\r\n";
     DWORD dwSendSize = 10;
     COMSTAT Comstat;
@@ -323,72 +326,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WRITING:
             //WRITINGボタンを押したときの動作
             
-            /*
-            hPort = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-            if (hPort == INVALID_HANDLE_VALUE) {
-                MessageBox(hWnd, TEXT("COM8はないです。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hPort);
-                break;
-            }
-
-            Ret = SetupComm(hPort, 1024, 1024);
-            if (Ret == FALSE) {
-                MessageBox(hWnd, TEXT("Setupに失敗しました"), TEXT("エラー"), MB_OK);
-                CloseHandle(hPort);
-                break;
-            }
-            Ret = PurgeComm(hPort, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
-            if (Ret == FALSE) {
-                MessageBox(hWnd, TEXT("Clearに失敗しました"), TEXT("エラー"), MB_OK);
-                CloseHandle(hPort);
-                break;
-            }
-
-            dcb.BaudRate = 9600; // 速度
-            dcb.ByteSize = 8; // データ長
-            dcb.Parity = NOPARITY; // パリティ
-            dcb.StopBits = ONESTOPBIT; // ストップビット長
-            dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
-            dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
-            dcb.EofChar = 0x03;
-            dcb.EvtChar = 0x02;
-
-            timeout.ReadIntervalTimeout = 500;
-            timeout.ReadTotalTimeoutMultiplier = 0;
-            timeout.ReadTotalTimeoutConstant = 500;
-
-            timeout.WriteTotalTimeoutMultiplier = 0;
-            timeout.WriteTotalTimeoutConstant = 500;
-
-            Ret = SetCommTimeouts(hPort, &timeout);
-
-            if (Ret == FALSE)
-            {
-                MessageBox(hWnd, TEXT("SetTimeoutに失敗しました。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hPort);
-                break;
-            }
-
-            str = "GC\r\n";
-            for (int i = 0; i < strlen(str); i++) {
-                Ret = WriteFile(hPort, &str[i], 1, &dwSendSize, NULL);
-                if (Ret == FALSE) {
-                    MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
-                    CloseHandle(hPort);
-                    break;
-                }
-            }
-
-            str = "\r\nOPEN:1\r\n";
-            Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
-            if (Ret == FALSE) {
-                MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hPort);
-                break;
-            }
-            *///シャッターに関して
-
             //動作に関して↓
+
+            /*
             //CloseHandle(hPort);
             hPort = CreateFile(L"COM5", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if (hPort == INVALID_HANDLE_VALUE) {
@@ -417,7 +357,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             Sleep(1000);
             CloseHandle(hPort);
-            break;
+            *///動作に関して
+
+            if (Send_Stage_Message_Serial(hWnd, dcb, hPort, "RPS2", "9", "30000") == FALSE) {
+                MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
+            }
             /*
             hWnd = FindWindow(NULL, TEXT("Chamonix"));
             if (hWnd != 0) {
@@ -428,13 +372,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
             }
             */
+
+            if (Control_Stage_and_image(hWnd, dcb, hPort, 3, "10000") == FALSE) {
+                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
+            }
+
+            /*
             for (int a = 0; a <1 ; a++) {
                 Control_Stage_and_image(hWnd, hPort, 3, 10000);
                 Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image, 10000);
                 Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 2, 10000);
                 Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 3, 10000);
             }
+            */
 
+
+            if (Send_Stage_Message_Serial(hWnd, dcb, hPort, "RPS2", "9", "110000") == FALSE) {
+                MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
+            }
+
+            if (Send_Stage_Message_Serial(hWnd, dcb, hPort, "RPS2", "9", "30000") == FALSE) {
+                MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
+            }
 
 
             hWnd = FindWindow(NULL, TEXT("Chamonix"));
@@ -732,7 +691,7 @@ void Control_Stage_and_image(HWND hWnd, HANDLE hPort,int bitmap_num, int movemen
     str = "\r\nCLOSE:1\r\n";
     Ret = WriteFile(hPort, str, 12, &dwSendSize, NULL);
 
-    //ステージのコントロール
+    //ステージのコントロール    
     hWnd = FindWindow(NULL, TEXT("Chamonix"));
     if (hWnd != 0) {
         snprintf(move, 10, "%d", movement);
@@ -742,12 +701,81 @@ void Control_Stage_and_image(HWND hWnd, HANDLE hPort,int bitmap_num, int movemen
     else {
         MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
     }
-
+    
     //シャッターオープン
     Sleep(2000);
     str = "\r\nOPEN:1\r\n";
     Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
 
+}
+
+BOOL Control_Stage_and_image(HWND hWnd, DCB dcb, HANDLE hPort, int bitmap_num, const char* move) {
+    HBITMAP hBmp[200];
+    TCHAR bmpname[] = TEXT("cubic3_10_10AA");
+    HDC hdc;
+    LPCSTR str = "OPEN:1\r\n";
+    DWORD dwSendSize = 10;
+    bool flag = TRUE;
+
+    //bitmapの読み込み
+    for (int i = 0; i < Split_Image; i++) {
+        for (int m = 0; m < Separate_Image; m++) {
+            hdc = GetDC(hWnd);
+            wsprintf(bmpname, TEXT("IDB_BITMAP%d"), bitmap_num + m + i * Separate_Image);//TEXT("MOVIE1_%d_%d"), i, m);
+            int imagenum = MOVIE_START + Separate_Image * i + m;
+            hBmp[imagenum] = LoadBitmap(hInst, bmpname);
+            hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
+            SelectObject(hdc_men_array[imagenum], hBmp[imagenum]);
+            ReleaseDC(hWnd, hdc);
+        }
+    }
+    //Sleep(1000);
+
+    //ビットマップの再生
+    for (int i = MOVIE_START; i < MOVIE_START + Split_Image * Separate_Image; i++) {
+        hWnd = FindWindow(NULL, TEXT("BmpWindow"));
+        drawing = i;
+        SendMessage(hWnd, WM_PAINT, NULL, NULL);
+        Sleep(40);
+    }
+
+    drawing = MOVIE_WAIT;
+    SendMessage(hWnd, WM_PAINT, NULL, NULL);
+
+    //シャッターとの通信設定
+    hPort = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hPort == INVALID_HANDLE_VALUE) {
+        MessageBox(hWnd, TEXT("COM8はないです。"), TEXT("エラー"), MB_OK);
+        CloseHandle(hPort);
+        flag = FALSE;
+    }
+
+    dcb.BaudRate = 9600; // 速度
+    dcb.ByteSize = 8; // データ長
+    dcb.Parity = NOPARITY; // パリティ
+    dcb.StopBits = ONESTOPBIT; // ストップビット長
+    dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+    dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+
+    SetCommState(hPort, &dcb);
+    
+    //シャッターのクローズ
+    str = "\r\nCLOSE:1\r\n";
+    WriteFile(hPort, str, strlen(str) + 1, &dwSendSize, NULL);
+
+    //ステージの移動
+    CloseHandle(hPort);
+    if (Send_Stage_Message_Serial(hWnd, dcb, hPort, "RPS2", "9", move) == FALSE) {
+        MessageBox(hWnd, TEXT("ステージ移動ができません。"), TEXT("エラー"), MB_OK);
+        flag = FALSE;
+    }
+
+    //シャッターオープン
+    //Sleep(2000);
+    str = "\r\nOPEN:1\r\n";
+    WriteFile(hPort, str, strlen(str) + 1, &dwSendSize, NULL);
+
+    return flag;
 }
 
 //Chamonixへ送信する関数
@@ -769,6 +797,52 @@ BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,
 
     SendMessage(hSSM, WM_COPYDATA, ReceveData, (LPARAM)SendData);
     return (BOOL)SendMessage;
+}
+
+//シリアル通信で直接CRUXへ送信する関数
+BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equipment, const char* controll_num, const char* move) {
+    const char* Slash = "/";
+    char str[50] = {};
+    DWORD dwSendSize = 10;
+    bool flag=TRUE;
+
+    hPort = CreateFile(L"COM5", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hPort == INVALID_HANDLE_VALUE) {
+        MessageBox(hWnd, TEXT("COM5はないです。"), TEXT("エラー"), MB_OK);
+        CloseHandle(hPort);
+        flag = FALSE;
+    }
+
+    dcb.BaudRate = 9600; // 速度
+    dcb.ByteSize = 8; // データ長
+    dcb.Parity = NOPARITY; // パリティ
+    dcb.StopBits = ONESTOPBIT; // ストップビット長
+    dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+    dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+    dcb.EofChar = 0x03;
+    dcb.EvtChar = 0x02;
+
+    SetCommState(hPort, &dcb);
+
+    strcat_s(str, "\r\n\x02");
+    strcat_s(str, equipment);
+    strcat_s(str, "/");
+    strcat_s(str, controll_num);
+    strcat_s(str, "/");
+    strcat_s(str, move);
+    strcat_s(str, "/");
+    strcat_s(str, "1");
+    strcat_s(str, "\r\n");
+
+    if (WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL) == FALSE) {
+        MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
+        CloseHandle(hPort);
+        flag = FALSE;
+    }
+    //Sleep(1000);
+    CloseHandle(hPort);
+
+    return flag;
 }
 
 // バージョン情報ボックスのメッセージ ハンドラーです。
