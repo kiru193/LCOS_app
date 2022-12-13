@@ -285,6 +285,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WRITING:
             //WRITINGボタンを押したときの動作
             
+            //シャッターのシリアル通信設定
+            hShutter = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            if (hShutter == INVALID_HANDLE_VALUE) {
+                MessageBox(hWnd, TEXT("シャッターのシリアル接続エラーです。"), TEXT("エラー"), MB_OK);
+                CloseHandle(hShutter);
+                break;
+            }
+
+            dcbShutter.BaudRate = 9600; // 速度
+            dcbShutter.ByteSize = 8; // データ長
+            dcbShutter.Parity = NOPARITY; // パリティ
+            dcbShutter.StopBits = ONESTOPBIT; // ストップビット長
+            dcbShutter.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+            dcbShutter.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+            dcbShutter.EofChar = 0x03;
+            dcbShutter.EvtChar = 0x02;
+
+            SetCommState(hShutter, &dcbShutter);
+
+
             //ステージのシリアル通信設定
             hStage = CreateFile(L"COM5", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if (hStage == INVALID_HANDLE_VALUE) {
@@ -303,26 +323,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             dcbStage.EvtChar = 0x02;
 
             SetCommState(hStage, &dcbStage);
-
-            //シャッターのシリアル通信設定
-            hShutter = CreateFile(L"COM5", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-            if (hShutter == INVALID_HANDLE_VALUE) {
-                MessageBox(hWnd, TEXT("ステージのシリアル接続エラーです。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hStage);
-                break;
-            }
-
-            dcbShutter.BaudRate = 9600; // 速度
-            dcbShutter.ByteSize = 8; // データ長
-            dcbShutter.Parity = NOPARITY; // パリティ
-            dcbShutter.StopBits = ONESTOPBIT; // ストップビット長
-            dcbShutter.fOutxCtsFlow = FALSE; // 送信時CTSフロー
-            dcbShutter.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
-            dcbShutter.EofChar = 0x03;
-            dcbShutter.EvtChar = 0x02;
-
-            SetCommState(hShutter, &dcbShutter);
-
 
             /*
             str = "\r\n\x02RPS2/9/30000/1\r\n";
@@ -761,24 +761,6 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
     DWORD dwSendSize = 10;
     bool flag=TRUE;
 
-    hPort = CreateFile(L"COM5", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hPort == INVALID_HANDLE_VALUE) {
-        MessageBox(hWnd, TEXT("COM5はないです。"), TEXT("エラー"), MB_OK);
-        CloseHandle(hPort);
-        flag = FALSE;
-    }
-
-    dcb.BaudRate = 9600; // 速度
-    dcb.ByteSize = 8; // データ長
-    dcb.Parity = NOPARITY; // パリティ
-    dcb.StopBits = ONESTOPBIT; // ストップビット長
-    dcb.fOutxCtsFlow = FALSE; // 送信時CTSフロー
-    dcb.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
-    dcb.EofChar = 0x03;
-    dcb.EvtChar = 0x02;
-
-    SetCommState(hPort, &dcb);
-
     strcat_s(str, "\r\n\x02");
     strcat_s(str, equipment);
     strcat_s(str, "/");
@@ -794,9 +776,6 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
         CloseHandle(hPort);
         flag = FALSE;
     }
-    //Sleep(1000);
-    CloseHandle(hPort);
-
     return flag;
 }
 
