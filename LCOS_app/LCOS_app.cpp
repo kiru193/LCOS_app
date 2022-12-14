@@ -29,6 +29,9 @@
 #define Rotate_Forward 3
 #define Rotate_Backward 4
 
+#define Shutter_OPEN 1
+#define Shutter_CLOSE 0
+
 using namespace std;
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -67,6 +70,9 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
 //ステージコントロールと画像表示の為の関数
 void Control_Stage_and_image(HWND hWnd, HANDLE hPort, int bitmap_num, int movement);
 BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter, DCB dcbStage, HANDLE hStage, int bitmap_num, const char* move);
+
+//シャッターの制御をおこなう関数
+BOOL Shutter_Controll(HANDLE hShutter,int status);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -242,6 +248,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     COMSTAT Comstat;
     HANDLE hShutter,hStage;
     DCB dcbShutter,dcbStage;
+    bool start = TRUE;
 
     unsigned char Set_moving_stage[] = {
         X_Forward,
@@ -326,31 +333,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             //動作に関して
 
-            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "30000") == FALSE) {
+            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "0") == FALSE) {//180000で一回転
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
-            
-            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3, "10000") == FALSE) {
-                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
-            }
-            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image, "10000") == FALSE) {
-                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
-            }
-            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image * 2, "10000") == FALSE) {
-                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
-            }
-            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image * 3, "10000") == FALSE) {
-                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
+            for (int a = 0; a < 4; a++) {
+                if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3, "10000") == FALSE) {
+                    MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
+                }
+                if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image, "10000") == FALSE) {
+                    MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
+                }
+                if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image * 2, "10000") == FALSE) {
+                    MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
+                }
+                if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image * 3, "10000") == FALSE) {
+                    MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
+                }
             }
             
 
-            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "110000") == FALSE) {
+            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "20000") == FALSE) {
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
 
             drawing = MOVIE_END;
             SendMessage(hWnd, WM_PAINT, NULL, NULL);
-            //CloseHandle(hPort);
+            
+            CloseHandle(hShutter);
+            CloseHandle(hStage);
             break;
 
         case ID_RESET:
@@ -677,8 +687,9 @@ BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter,DCB dcbS
     SendMessage(hWnd, WM_PAINT, NULL, NULL);
     
     //シャッターのクローズ
-    str = "\r\nCLOSE:1\r\n";
-    WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL);
+    Shutter_Controll(hShutter, Shutter_CLOSE);
+//    str = "\r\nCLOSE:1\r\n";
+//    WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL);
 
     //ステージの移動
     if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", move) == FALSE) {
@@ -687,9 +698,58 @@ BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter,DCB dcbS
     }
 
     //シャッターオープン
-    //Sleep(2000);
-    str = "\r\nOPEN:1\r\n";
-    WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL);
+    Shutter_Controll(hShutter, Shutter_OPEN);
+//    str = "\r\nOPEN:1\r\n";
+//    WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL);
+
+    return flag;
+}
+//シャッターのコントロールに関する関数
+BOOL Shutter_Controll(HANDLE hShutter, int status) {
+    char receive[1];
+    char data[50];
+    DWORD dwSendSize = 10;
+    bool flag = TRUE;
+    unsigned long nn;
+    int i = 0;
+    char str[50] = {};
+
+
+    switch (status)
+    {
+    case Shutter_OPEN:
+        strcat_s(str, "\r\nOPEN:1\r\n");
+        while (WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL) == FALSE);
+        while (ReadFile(hShutter, receive, 1, &nn, 0) == FALSE);
+        while (WriteFile(hShutter, "\r\nOPEN?1\r\n", 12, &dwSendSize, NULL) == FALSE);
+        while (1) {
+            ReadFile(hShutter, receive, 1, &nn, 0);
+            data[i] = *receive;
+            i++;
+            if (*receive == '\n') {
+                break;
+            }
+        }
+        break;
+    case Shutter_CLOSE:
+        strcat_s(str, "\r\nCLOSE:1\r\n");
+        while (WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL) == FALSE);
+        while (ReadFile(hShutter, receive, 1, &nn, 0) == FALSE);
+        while (WriteFile(hShutter, "\r\nOPEN?1\r\n", 12, &dwSendSize, NULL) == FALSE);
+        while (1) {
+            ReadFile(hShutter, receive, 1, &nn, 0);
+            data[i] = *receive;
+            i++;
+            if (*receive == '\n') {
+                break;
+            }
+        }
+        break;
+    default:
+        flag = FALSE;
+        break;
+    }
+    printf("%s", data);
 
     return flag;
 }
@@ -717,10 +777,11 @@ BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,
 
 //シリアル通信で直接CRUXへ送信する関数
 BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equipment, const char* controll_num, const char* move) {
-    const char* Slash = "/";
     char str[50] = {};
+    char receive[1];
     DWORD dwSendSize = 10;
     bool flag=TRUE;
+    unsigned long nn;
 
     strcat_s(str, "\r\n\x02");
     strcat_s(str, equipment);
@@ -729,13 +790,17 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
     strcat_s(str, "/");
     strcat_s(str, move);
     strcat_s(str, "/");
-    strcat_s(str, "1");
+    strcat_s(str, "0");
     strcat_s(str, "\r\n");
 
     if (WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL) == FALSE) {
         MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
         CloseHandle(hPort);
         flag = FALSE;
+    }
+
+    while (*receive != 'C') {
+        ReadFile(hPort, receive, 1, &nn, 0);
     }
     return flag;
 }
