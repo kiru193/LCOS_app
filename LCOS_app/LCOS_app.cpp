@@ -324,67 +324,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             SetCommState(hStage, &dcbStage);
 
-            /*
-            str = "\r\n\x02RPS2/9/30000/1\r\n";
-            if (WriteFile(hStage, str, strlen(str)+1, &dwSendSize, NULL) == FALSE) {
-                MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hStage);
-                break;
-            }
-            Sleep(1000);
-            */
-            //CloseHandle(hPort);
             //動作に関して
 
             if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "30000") == FALSE) {
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
-            /*
-            hWnd = FindWindow(NULL, TEXT("Chamonix"));
-            if (hWnd != 0) {
-                Send_Stage_Message(hWnd, "RPS2", "9", "30000");
-                while (Send_Stage_Message == 0);
-            }
-            else {
-                MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-            }
-            */
-
+            
             if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3, "10000") == FALSE) {
                 MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
             }
-
-            /*
-            for (int a = 0; a <1 ; a++) {
-                Control_Stage_and_image(hWnd, hPort, 3, 10000);
-                Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image, 10000);
-                Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 2, 10000);
-                Control_Stage_and_image(hWnd, hPort, 3 + Split_Image * Separate_Image * 3, 10000);
-            }
-            */
-
-
-            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3, "110000") == FALSE) {
+            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image, "10000") == FALSE) {
                 MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
             }
-
-
-            hWnd = FindWindow(NULL, TEXT("Chamonix"));
-            if (hWnd != 0) {
-                Send_Stage_Message(hWnd, "RPS2", "9", "90000");
-                while (Send_Stage_Message == 0);
+            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image * 2, "10000") == FALSE) {
+                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
             }
-            else {
-            MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image * 3, "10000") == FALSE) {
+                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
             }
+            
 
-            hWnd = FindWindow(NULL, TEXT("Chamonix"));
-            if (hWnd != 0) {
-                Send_Stage_Message(hWnd, "RPS2", "9", "20000");
-                while (Send_Stage_Message == 0);
-            }
-            else {
-                MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "110000") == FALSE) {
+                MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
 
             drawing = MOVIE_END;
@@ -662,7 +623,7 @@ void Control_Stage_and_image(HWND hWnd, HANDLE hPort,int bitmap_num, int movemen
 
     //シャッターのクローズ
     str = "\r\nCLOSE:1\r\n";
-    Ret = WriteFile(hPort, str, 12, &dwSendSize, NULL);
+    Ret = WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL);
 
     //ステージのコントロール    
     hWnd = FindWindow(NULL, TEXT("Chamonix"));
@@ -678,7 +639,7 @@ void Control_Stage_and_image(HWND hWnd, HANDLE hPort,int bitmap_num, int movemen
     //シャッターオープン
     Sleep(2000);
     str = "\r\nOPEN:1\r\n";
-    Ret = WriteFile(hPort, str, 11, &dwSendSize, NULL);
+    Ret = WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL);
 
 }
 
