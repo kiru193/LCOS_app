@@ -3,7 +3,6 @@
 
 #include "framework.h"
 #include "LCOS_app.h"
-#include "CSerial.h"
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
@@ -20,7 +19,7 @@
 #define MOVIE_WAIT 0
 #define HPK 1
 
-#define Split_Image 4
+#define Split_Image 1
 #define Separate_Image 16
 #define Num_Image Split_Image*Separate_Image
 
@@ -74,6 +73,10 @@ BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter, DCB dcb
 //シャッターの制御をおこなう関数
 BOOL Shutter_Controll(HANDLE hShutter,int status);
 
+//シリアル通信の変数について
+HANDLE hShutter, hStage;
+DCB dcbShutter, dcbStage;
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -117,8 +120,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     return (int) msg.wParam;
 }
-
-
 
 //
 //  関数: MyRegisterClass()
@@ -246,8 +247,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     const char* str = "OPEN:1\r\n";
     DWORD dwSendSize = 10;
     COMSTAT Comstat;
-    HANDLE hShutter,hStage;
-    DCB dcbShutter,dcbStage;
+
     bool start = TRUE;
 
     unsigned char Set_moving_stage[] = {
@@ -262,6 +262,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_COMMAND:
     {
+        //シャッターのシリアル通信設定
+        hShutter = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (hShutter == INVALID_HANDLE_VALUE) {
+            MessageBox(hWnd, TEXT("シャッターのシリアル接続エラーです。"), TEXT("エラー"), MB_OK);
+            CloseHandle(hShutter);
+        }
+
+        dcbShutter.BaudRate = 9600; // 速度
+        dcbShutter.ByteSize = 8; // データ長
+        dcbShutter.Parity = NOPARITY; // パリティ
+        dcbShutter.StopBits = ONESTOPBIT; // ストップビット長
+        dcbShutter.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+        dcbShutter.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+        dcbShutter.EofChar = 0x03;
+        dcbShutter.EvtChar = 0x02;
+
+        SetCommState(hShutter, &dcbShutter);
+
+
+        //ステージのシリアル通信設定
+        hStage = CreateFile(L"COM5", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (hStage == INVALID_HANDLE_VALUE) {
+            MessageBox(hWnd, TEXT("ステージのシリアル接続エラーです。"), TEXT("エラー"), MB_OK);
+            CloseHandle(hStage);
+        }
+
+        dcbStage.BaudRate = 9600; // 速度
+        dcbStage.ByteSize = 8; // データ長
+        dcbStage.Parity = NOPARITY; // パリティ
+        dcbStage.StopBits = ONESTOPBIT; // ストップビット長
+        dcbStage.fOutxCtsFlow = FALSE; // 送信時CTSフロー
+        dcbStage.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
+        dcbStage.EofChar = 0x03;
+        dcbStage.EvtChar = 0x02;
+
+        SetCommState(hStage, &dcbStage);
+
         int wmId = LOWORD(wParam);
         // 選択されたメニューの解析:
         switch (wmId)
@@ -276,7 +313,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case ID_ALIGNMENT:
             //ALIGNMENTボタンを押したときの動作
+            //Dialogでの処理
             DialogBox(hInst, MAKEINTRESOURCE(ALIGNMENT_DAILOG), hWnd, (DLGPROC)AlignmentDlgProc);
+            
+            CloseHandle(hShutter);
+            CloseHandle(hStage);
             break;
 
         case ID_SHOW:
@@ -287,50 +328,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_OPEN:
             //OPENボタンを押したときの動作
-
+           
+            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3, "10000") == FALSE) {
+                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
+            }
+            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "80000") == FALSE) {
+                MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
+            }
+            CloseHandle(hShutter);
+            CloseHandle(hStage);
             break;
         case WRITING:
             //WRITINGボタンを押したときの動作
             
-            //シャッターのシリアル通信設定
-            hShutter = CreateFile(L"COM8", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-            if (hShutter == INVALID_HANDLE_VALUE) {
-                MessageBox(hWnd, TEXT("シャッターのシリアル接続エラーです。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hShutter);
-                break;
-            }
-
-            dcbShutter.BaudRate = 9600; // 速度
-            dcbShutter.ByteSize = 8; // データ長
-            dcbShutter.Parity = NOPARITY; // パリティ
-            dcbShutter.StopBits = ONESTOPBIT; // ストップビット長
-            dcbShutter.fOutxCtsFlow = FALSE; // 送信時CTSフロー
-            dcbShutter.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
-            dcbShutter.EofChar = 0x03;
-            dcbShutter.EvtChar = 0x02;
-
-            SetCommState(hShutter, &dcbShutter);
-
-
-            //ステージのシリアル通信設定
-            hStage = CreateFile(L"COM5", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-            if (hStage == INVALID_HANDLE_VALUE) {
-                MessageBox(hWnd, TEXT("ステージのシリアル接続エラーです。"), TEXT("エラー"), MB_OK);
-                CloseHandle(hStage);
-                break;
-            }
-
-            dcbStage.BaudRate = 9600; // 速度
-            dcbStage.ByteSize = 8; // データ長
-            dcbStage.Parity = NOPARITY; // パリティ
-            dcbStage.StopBits = ONESTOPBIT; // ストップビット長
-            dcbStage.fOutxCtsFlow = FALSE; // 送信時CTSフロー
-            dcbStage.fRtsControl = RTS_CONTROL_ENABLE; // RTSフロー
-            dcbStage.EofChar = 0x03;
-            dcbStage.EvtChar = 0x02;
-
-            SetCommState(hStage, &dcbStage);
-
             //動作に関して
 
             if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "0") == FALSE) {//180000で一回転
@@ -350,8 +360,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
                 }
             }
-            
-
             if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "20000") == FALSE) {
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
@@ -489,7 +497,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         //START，END，HPK画像の読み込み
         hdc = GetDC(hWnd);
-        hBmp[0] = LoadBitmap(hInst, TEXT("START_END"));
+        hBmp[0] = LoadBitmap(hInst, TEXT("CHECKER2"));
         hdc_men_array[0] = CreateCompatibleDC(hdc);
         SelectObject(hdc_men_array[0], hBmp[0]);
 
@@ -523,22 +531,16 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 //ダイアログボックスの中身
 BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
-    HWND hWnd;
-    CHAR szBuf[64];
-    //CHAR numchar[10];
-    size_t mojinum;
-    WCHAR numwchar[10];
     BOOL *success=0, bSigned=0;
-    int num=0;
-    char const* eq = "RPS1", * con = "0", * move = "10000000";
-    char numchar[10];
-    eq = "RPS2";
-    con = "9";
-    move = "-1000";
-    
+    int num = 0;
+    char numchar[] = "100000";
+    static HWND hParent;
 
     switch (msg)
     {
+    case WM_INITDIALOG:
+        SetDlgItemInt(hDlog, ALIGNMENT_EDIT, -16400, TRUE);
+        break;
     case WM_COMMAND:
         if (LOWORD(wp) == ALIGNMENT_CANCEL_BUTTON)
         {
@@ -546,47 +548,15 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
             return (INT_PTR)TRUE;
         }
         else if(LOWORD(wp) == ALIGNMENT_OK_BUTTON){
-            num = GetDlgItemInt(hDlog, ALIGNMENT_EDIT, success, bSigned);
-            if (&success) {
-                sprintf_s(numchar,10, "%d", num);                
-                //mbstowcs_s(&mojinum, numwchar, sizeof(numwchar), numchar, _TRUNCATE);
-                //MessageBox(hDlog, numwchar, TEXT("確認"), MB_OK);
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                    eq = "RPS1";
-                    con = "9";
-                    move = "-90000";//numchar;
-                    Send_Stage_Message(hWnd, eq, con, move);
-                    while (Send_Stage_Message == 0);
-                    eq = "RPS1";
-                    con = "9";
-                    move = "-77350"; //"-77350";//numchar;
-                    Send_Stage_Message(hWnd, eq, con, move);
-                    while (Send_Stage_Message == 0);
-                    //eq = "RPS1";
-                    //con = "9";
-                    //move = "-500";// "-18500";//"-70500";//numchar;////
-                    //Send_Stage_Message(hWnd, eq, con, move);
-                    //while (Send_Stage_Message == 0);
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
-            }
-            else {
-                MessageBox(hDlog, TEXT("なんも入ってないと思う"), TEXT("確認"), MB_OK);
+            num = GetDlgItemInt(hDlog, ALIGNMENT_EDIT, success, TRUE);
+            sprintf_s(numchar, strlen(numchar) + 1, "%d", num);
+            if (Send_Stage_Message_Serial(hDlog, dcbStage, hStage, "RPS1", "9", numchar /*"16400"*/) == FALSE) {
+                MessageBox(hDlog, TEXT("シリアル送信エラーです"), TEXT("エラー"), MB_OK);
             }
         }
         else if (LOWORD(wp) == ALIGNMENT_INI) {
-            hWnd = FindWindow(NULL, TEXT("Chamonix"));
-            if (hWnd != 0) {
-                eq = "ORG1";
-                con = "9";
-                Send_Stage_Message(hWnd, eq, con, move);
-                while (Send_Stage_Message == 0);
-            }
-            else {
-                MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
+            if (Send_Stage_Message_Serial(hDlog, dcbStage, hStage, "ORG1", "9", "0") == FALSE) {
+                MessageBox(hDlog, TEXT("シリアル送信エラーです"), TEXT("エラー"), MB_OK);
             }
         }
         break;
@@ -665,7 +635,7 @@ BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter,DCB dcbS
     for (int i = 0; i < Split_Image; i++) {
         for (int m = 0; m < Separate_Image; m++) {
             hdc = GetDC(hWnd);
-            wsprintf(bmpname, TEXT("IDB_BITMAP%d"), bitmap_num + m + i * Separate_Image);//TEXT("MOVIE1_%d_%d"), i, m);
+            wsprintf(bmpname, TEXT("AIDB_BITMAP%d"), bitmap_num + m + i * Separate_Image);//TEXT("MOVIE1_%d_%d"), i, m);
             int imagenum = MOVIE_START + Separate_Image * i + m;
             hBmp[imagenum] = LoadBitmap(hInst, bmpname);
             hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
@@ -688,19 +658,15 @@ BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter,DCB dcbS
     
     //シャッターのクローズ
     Shutter_Controll(hShutter, Shutter_CLOSE);
-//    str = "\r\nCLOSE:1\r\n";
-//    WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL);
 
     //ステージの移動
     if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", move) == FALSE) {
         MessageBox(hWnd, TEXT("ステージ移動ができません。"), TEXT("エラー"), MB_OK);
         flag = FALSE;
     }
-
+    Sleep(2);
     //シャッターオープン
     Shutter_Controll(hShutter, Shutter_OPEN);
-//    str = "\r\nOPEN:1\r\n";
-//    WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL);
 
     return flag;
 }
@@ -779,29 +745,44 @@ BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,
 BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equipment, const char* controll_num, const char* move) {
     char str[50] = {};
     char receive[1];
+    char data[50];
     DWORD dwSendSize = 10;
     bool flag=TRUE;
     unsigned long nn;
 
-    strcat_s(str, "\r\n\x02");
-    strcat_s(str, equipment);
-    strcat_s(str, "/");
-    strcat_s(str, controll_num);
-    strcat_s(str, "/");
-    strcat_s(str, move);
-    strcat_s(str, "/");
-    strcat_s(str, "0");
-    strcat_s(str, "\r\n");
+    if (equipment[0] == 'R' && equipment[1] == 'P' && equipment[2] == 'S') {
+        strcat_s(str, "\r\n\x02");
+        strcat_s(str, equipment);
+        strcat_s(str, "/");
+        strcat_s(str, controll_num);
+        strcat_s(str, "/");
+        strcat_s(str, move);
+        strcat_s(str, "/");
+        strcat_s(str, "0");
+        strcat_s(str, "\r\n");
+    }
+    else if (equipment[0] == 'O' && equipment[1] == 'R' && equipment[2] == 'G') {
+        strcat_s(str, "\r\n\x02");
+        strcat_s(str, equipment);
+        strcat_s(str, "/");
+        strcat_s(str, controll_num);
+        strcat_s(str, "/");
+        strcat_s(str, "0");
+        strcat_s(str, "\r\n");
+    }
 
     if (WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL) == FALSE) {
         MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
         CloseHandle(hPort);
         flag = FALSE;
     }
-
-    while (*receive != 'C') {
+    int i = 0;
+    while (*receive != '\n') {
         ReadFile(hPort, receive, 1, &nn, 0);
+        data[i] = *receive;
+        i++;
     }
+    
     return flag;
 }
 
