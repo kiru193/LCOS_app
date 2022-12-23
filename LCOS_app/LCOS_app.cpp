@@ -61,6 +61,7 @@ int drawing = 0;
 
 //ダイアログに関して
 BOOL CALLBACK AlignmentDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK SpeedcontrollDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 //回転、Xステージへの送信関数
 BOOL Send_Stage_Message(HWND hSSM,char const* equipment,char const* controll_num,char const* move);
@@ -235,7 +236,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static HWND hSend, hShow, hWrintig, hTestwriting, hReset;
+    static HWND hSend, hShow, hWrintig, hSpeedcon, hReset;
     static HWND hShow2;
 
     HBITMAP hBmp[200];
@@ -328,7 +329,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_OPEN:
             //OPENボタンを押したときの動作
-           
             if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3, "10000") == FALSE) {
                 MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
             }
@@ -341,8 +341,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WRITING:
             //WRITINGボタンを押したときの動作
             
-            //動作に関して
-
             if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "0") == FALSE) {//180000で一回転
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
@@ -428,12 +426,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
                 }
             }
-        case ID_TEST:
-            hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-            drawing = 100;
-            SendMessage(hWnd, WM_PAINT, NULL, NULL);
-            break;
+        case ID_SPEED_CON:
+            //Dialogでの処理
+            DialogBox(hInst, MAKEINTRESOURCE(SPEEDCON_DIALOG), hWnd, (DLGPROC)SpeedcontrollDlgProc);
 
+            CloseHandle(hShutter);
+            CloseHandle(hStage);
+            break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -445,7 +444,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hShow = CreateWindow(TEXT("BUTTON"), TEXT("SHOW HPK"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
         hShutter = CreateWindow(TEXT("BUTTON"), TEXT("OPEN"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ID_OPEN, hInst, NULL);
         hWrintig = CreateWindow(TEXT("BUTTON"), TEXT("WRITING"), WS_CHILD | WS_VISIBLE, 130, 50, 100, 30, hWnd, (HMENU)WRITING, hInst, NULL);
-        hTestwriting = CreateWindow(TEXT("BUTTON"), TEXT("TEST"), WS_CHILD | WS_VISIBLE, 130, 10, 100, 30, hWnd, (HMENU)ID_TEST, hInst, NULL);
+        hSpeedcon = CreateWindow(TEXT("BUTTON"), TEXT("SPEED CON"), WS_CHILD | WS_VISIBLE, 130, 10, 100, 30, hWnd, (HMENU)ID_SPEED_CON, hInst, NULL);
         hReset = CreateWindow(TEXT("BUTTON"), TEXT("RESET"), WS_CHILD | WS_VISIBLE, 130, 90, 100, 30, hWnd, (HMENU)ID_RESET, hInst, NULL);
         break;
     case WM_PAINT:
@@ -529,7 +528,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-//ダイアログボックスの中身
+//アライメントダイアログボックスの中身
 BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
     BOOL *success=0, bSigned=0;
     int num = 0;
@@ -560,6 +559,96 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
             }
         }
         break;
+    case WM_CLOSE:
+        EndDialog(hDlog, LOWORD(wp));
+        return (INT_PTR)TRUE;
+    default:
+        break;
+    }
+    return FALSE;
+}
+
+//スピードコントロールダイアログボックス
+BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
+    BOOL* success = 0, bSigned = 0;
+    int num = 0;
+    char numchar[] = "100000", tablechar[] = "100000", startchar[] = "100000", maxchar[] = "100000", accelltimechar[] = "100000", accellmodechar[] = "100000";
+    char receive[1];
+    char data[5][50];
+    char str[5];
+    char move[50];
+    unsigned long nn;
+    static HWND hParent;
+
+    switch (msg)
+    {
+    case WM_INITDIALOG:
+        SetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, 2, FALSE);
+        SetDlgItemInt(hDlog, SPEEDCON_TABLE_EDIT, 9, FALSE);
+        break;
+    case WM_COMMAND:
+        if (LOWORD(wp) == SPEEDCON_CANCEL_BUTTON)
+        {
+            EndDialog(hDlog, LOWORD(wp));
+            return (INT_PTR)TRUE;
+        }
+        else if (LOWORD(wp) == SPEEDCON_READING_BUTTON) {
+            MessageBox(hDlog, TEXT("読み込みを始めます．"), TEXT("確認"), MB_OK);
+            int i = 0, j = 0;
+            sprintf_s(numchar, strlen(numchar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
+            strcat_s(str, "RTB");
+            strcat_s(str, numchar);
+            sprintf_s(tablechar, strlen(tablechar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
+            Send_Stage_Message_Serial(hDlog, dcbStage, hStage, str, tablechar, FALSE);
+            while (1) {
+                ReadFile(hStage, receive, 1, &nn, 0);
+                data[j][i];
+                i++;
+                if (*receive = '\n') {
+                    break;
+                }
+                else if (*receive = '\x09') {
+                    sprintf_s(data[j], strlen(data[j]) + 1, "%d", num);
+                    if (j == 3) {
+                        SetDlgItemInt(hDlog, SPEEDCON_START_EDIT, num, FALSE);
+                    }
+                    else if (j == 4) {
+                        SetDlgItemInt(hDlog, SPEEDCON_MAX_EDIT, num, FALSE);
+                    }
+                    else if (j == 5) {
+                        SetDlgItemInt(hDlog, SPEEDCON_ACCELLTIME_EDIT, num, FALSE);
+                    }
+                    else if (j == 6) {
+                        SetDlgItemInt(hDlog, SPEEDCON_ACCELLMODE_EDIT, num, FALSE);
+                    }
+                    j++;
+                    i = 0;
+                }
+            }
+        }
+        else if (LOWORD(wp) == SPEEDCON_WRITING_BUTTON) {
+            MessageBox(hDlog, TEXT("書き込みを始めます．"), TEXT("確認"), MB_OK);
+            sprintf_s(numchar, strlen(numchar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
+            strcat_s(str, "WTB");
+            strcat_s(str, numchar);
+            sprintf_s(tablechar, strlen(tablechar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
+            sprintf_s(startchar, strlen(startchar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_START_EDIT, success, FALSE));
+            strcat_s(move, startchar);
+            strcat_s(move, "/");
+            sprintf_s(maxchar, strlen(maxchar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_MAX_EDIT, success, FALSE));
+            strcat_s(move, maxchar);
+            strcat_s(move, "/");
+            sprintf_s(accelltimechar, strlen(accelltimechar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_ACCELLTIME_EDIT, success, FALSE));
+            strcat_s(move, accelltimechar);
+            strcat_s(move, "/");
+            sprintf_s(accellmodechar, strlen(accellmodechar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_ACCELLMODE_EDIT, success, FALSE));
+            strcat_s(move, accellmodechar);
+            Send_Stage_Message_Serial(hDlog, dcbStage, hStage, str, tablechar, move);
+        }
+        break;
+    case WM_CLOSE:
+        EndDialog(hDlog, LOWORD(wp));
+        return (INT_PTR)TRUE;
     default:
         break;
     }
@@ -770,18 +859,36 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
         strcat_s(str, "0");
         strcat_s(str, "\r\n");
     }
+    else if (equipment[0] == 'R' && equipment[1] == 'T' && equipment[2] == 'B') {
+        strcat_s(str, "\r\n\x02");
+        strcat_s(str, equipment);
+        strcat_s(str, "/");
+        strcat_s(str, controll_num);
+        strcat_s(str, "\r\n");
+    }
+    else if (equipment[0] == 'W' && equipment[1] == 'T' && equipment[2] == 'B') {
+        strcat_s(str, "\r\n\x02");
+        strcat_s(str, equipment);
+        strcat_s(str, "/");
+        strcat_s(str, controll_num);
+        strcat_s(str, "/");
+        strcat_s(str, move);
+        strcat_s(str, "\r\n");
+    }
 
     if (WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL) == FALSE) {
         MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
         CloseHandle(hPort);
         flag = FALSE;
     }
+    /*
     int i = 0;
     while (*receive != '\n') {
         ReadFile(hPort, receive, 1, &nn, 0);
         data[i] = *receive;
         i++;
     }
+    */
     
     return flag;
 }
