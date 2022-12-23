@@ -570,15 +570,10 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
 
 //スピードコントロールダイアログボックス
 BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
-    BOOL* success = 0, bSigned = 0;
-    int num = 0;
-    char numchar[] = "100000", tablechar[] = "100000", startchar[] = "100000", maxchar[] = "100000", accelltimechar[] = "100000", accellmodechar[] = "100000";
-    char receive[1];
-    char data[5][50];
-    char str[5];
-    char move[50];
+    BOOL* success = 0;
     unsigned long nn;
     static HWND hParent;
+    bool flag = FALSE;
 
     switch (msg)
     {
@@ -593,57 +588,85 @@ BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
             return (INT_PTR)TRUE;
         }
         else if (LOWORD(wp) == SPEEDCON_READING_BUTTON) {
-            MessageBox(hDlog, TEXT("読み込みを始めます．"), TEXT("確認"), MB_OK);
-            int i = 0, j = 0;
-            sprintf_s(numchar, strlen(numchar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
-            strcat_s(str, "RTB");
-            strcat_s(str, numchar);
-            sprintf_s(tablechar, strlen(tablechar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
-            Send_Stage_Message_Serial(hDlog, dcbStage, hStage, str, tablechar, FALSE);
+            int j = 0;
+            char equipment[5] = {};
+            char numchar[2], tablechar[2], data[50],receive[1];
+            char* end1 = 0, * end2 = 0, * end3 = 0, * end4 = 0, * end5 = 0;
+            strcat_s(equipment, "RTB");
+            sprintf_s(numchar, 2, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
+            strcat_s(equipment, numchar);
+            sprintf_s(tablechar, 2, "%d", GetDlgItemInt(hDlog, SPEEDCON_TABLE_EDIT, success, FALSE));
+            Send_Stage_Message_Serial(hDlog, dcbStage, hStage, equipment, tablechar, FALSE);
             while (1) {
                 ReadFile(hStage, receive, 1, &nn, 0);
-                data[j][i];
-                i++;
-                if (*receive = '\n') {
+                if (*receive == 'C') {
+                    while (!(*receive >= '0' && *receive <= '9')) {
+                        ReadFile(hStage, receive, 1, &nn, 0);
+                        if (*receive == '\n') {
+                            break;
+                        }
+                    }
+                    while (*receive != '\n') {
+                        data[j] = *receive;
+                        j++;
+                        ReadFile(hStage, receive, 1, &nn, 0);
+                    }
+                }
+                else if (*receive == 'E') {
+                    MessageBox(hDlog, TEXT("取得エラーです"), TEXT("エラー"), MB_OK);
+                    SetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, 2, FALSE);
+                    SetDlgItemInt(hDlog, SPEEDCON_TABLE_EDIT, 9, FALSE);
+                    flag = TRUE;
+                    break;
+                }else if (*receive == '\n') {
                     break;
                 }
-                else if (*receive = '\x09') {
-                    sprintf_s(data[j], strlen(data[j]) + 1, "%d", num);
-                    if (j == 3) {
-                        SetDlgItemInt(hDlog, SPEEDCON_START_EDIT, num, FALSE);
-                    }
-                    else if (j == 4) {
-                        SetDlgItemInt(hDlog, SPEEDCON_MAX_EDIT, num, FALSE);
-                    }
-                    else if (j == 5) {
-                        SetDlgItemInt(hDlog, SPEEDCON_ACCELLTIME_EDIT, num, FALSE);
-                    }
-                    else if (j == 6) {
-                        SetDlgItemInt(hDlog, SPEEDCON_ACCELLMODE_EDIT, num, FALSE);
-                    }
-                    j++;
-                    i = 0;
-                }
             }
+            if (flag == TRUE) {
+                flag = FALSE;
+                break;
+            }
+            //ダイアログボックス内のエディターボックスに数値を入力する、strtolはdata内の数値のみを取り出し、何かしらの区切り記号を用いている場合以下のようにして各ボックスに入力できる。
+            SetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, strtol(data, &end1, 10), FALSE);
+            SetDlgItemInt(hDlog, SPEEDCON_TABLE_EDIT, strtol(end1, &end2, 10), FALSE);
+            SetDlgItemInt(hDlog, SPEEDCON_START_EDIT, strtol(end2,&end3,10), FALSE);
+            SetDlgItemInt(hDlog, SPEEDCON_MAX_EDIT, strtol(end3, &end4, 10), FALSE);
+            SetDlgItemInt(hDlog, SPEEDCON_ACCELLTIME_EDIT, strtol(end4, &end5, 10), FALSE);
+            SetDlgItemInt(hDlog, SPEEDCON_ACCELLMODE_EDIT, strtol(end5, &end1, 10), FALSE);
+            break;
         }
         else if (LOWORD(wp) == SPEEDCON_WRITING_BUTTON) {
-            MessageBox(hDlog, TEXT("書き込みを始めます．"), TEXT("確認"), MB_OK);
-            sprintf_s(numchar, strlen(numchar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
-            strcat_s(str, "WTB");
-            strcat_s(str, numchar);
-            sprintf_s(tablechar, strlen(tablechar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
-            sprintf_s(startchar, strlen(startchar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_START_EDIT, success, FALSE));
+            char num[5] = {};
+            char move[50] = {};
+            char numchar[2], tablechar[2],startchar[7],maxchar[7],accelltimechar[3],accellmodechar[2], receive[1];
+            strcat_s(num, "WTB");
+            sprintf_s(numchar, 2, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
+            strcat_s(num, numchar);
+            sprintf_s(tablechar, 2, "%d", GetDlgItemInt(hDlog, SPEEDCON_TABLE_EDIT, success, FALSE));
+            sprintf_s(startchar, 7, "%d", GetDlgItemInt(hDlog, SPEEDCON_START_EDIT, success, FALSE));
             strcat_s(move, startchar);
             strcat_s(move, "/");
-            sprintf_s(maxchar, strlen(maxchar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_MAX_EDIT, success, FALSE));
+            sprintf_s(maxchar, 7, "%d", GetDlgItemInt(hDlog, SPEEDCON_MAX_EDIT, success, FALSE));
             strcat_s(move, maxchar);
             strcat_s(move, "/");
-            sprintf_s(accelltimechar, strlen(accelltimechar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_ACCELLTIME_EDIT, success, FALSE));
+            sprintf_s(accelltimechar, 3, "%d", GetDlgItemInt(hDlog, SPEEDCON_ACCELLTIME_EDIT, success, FALSE));
             strcat_s(move, accelltimechar);
             strcat_s(move, "/");
-            sprintf_s(accellmodechar, strlen(accellmodechar) + 1, "%d", GetDlgItemInt(hDlog, SPEEDCON_ACCELLMODE_EDIT, success, FALSE));
+            sprintf_s(accellmodechar, 2, "%d", GetDlgItemInt(hDlog, SPEEDCON_ACCELLMODE_EDIT, success, FALSE));
             strcat_s(move, accellmodechar);
-            Send_Stage_Message_Serial(hDlog, dcbStage, hStage, str, tablechar, move);
+            Send_Stage_Message_Serial(hDlog, dcbStage, hStage, num, tablechar, move);
+            
+            while (1) {
+                ReadFile(hStage, receive, 1, &nn, 0);
+                if (*receive == 'C') {
+                    MessageBox(hDlog, TEXT("書き込みに成功しました"), TEXT("確認"), MB_OK);
+                    break;
+                }
+                else if (*receive == 'E') {
+                    MessageBox(hDlog, TEXT("書き込みに失敗しました"), TEXT("エラー"), MB_OK);
+                    break;
+                }
+            }
         }
         break;
     case WM_CLOSE:
@@ -876,19 +899,20 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
         strcat_s(str, "\r\n");
     }
 
-    if (WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL) == FALSE) {
+    if (WriteFile(hPort, str, strlen(str) + 1, &dwSendSize, NULL) == FALSE) {
         MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
         CloseHandle(hPort);
         flag = FALSE;
-    }
-    /*
+    }    
+    
+    //最初の\r\nに対する応答を受け取る、必ずいります。（ほかにいい方法があれば書き直して☆）
     int i = 0;
+    ReadFile(hPort, receive, 1, &nn, 0);
     while (*receive != '\n') {
         ReadFile(hPort, receive, 1, &nn, 0);
         data[i] = *receive;
         i++;
     }
-    */
     
     return flag;
 }
