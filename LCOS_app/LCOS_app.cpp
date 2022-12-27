@@ -746,7 +746,7 @@ BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
     bool flag = TRUE;
     unsigned long nn;
     char receive[1];
-    char data[50];
+    char data[100];
 
     //bitmapの読み込み
     for (int i = 0; i < Split_Image; i++) {
@@ -782,13 +782,7 @@ BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
         flag = FALSE;
     }
     
-//    int i = 0;
-//    while (*receive != '\n') {
-//        ReadFile(hStage, receive, 1, &nn, 0);
-//        data[i] = *receive;
-//        i++;
-//    }
-    Sleep(100);
+//    Sleep(200);
     //シャッターオープン
     Shutter_Controll(hShutter, Shutter_OPEN);
     flag = FALSE;
@@ -816,8 +810,8 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
             WriteFile(hShutter, "\r\nOPEN:1\r\n", 12, &dwSendSize, NULL);
             Sleep(1);
             i++;
-
-/*            while (1) {
+/*
+            while (1) {
                 ReadFile(hShutter, receive, 1, &nn, 0);
                 data[i] = *receive;
                 i++;
@@ -835,6 +829,9 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
                             openflag = TRUE;
                             break;
                         }
+                        else if (*receive == 'C') {
+                            break;
+                        }
                     }
                 }
                 if (openflag == TRUE) {
@@ -845,18 +842,18 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
                 break;
             }
             WriteFile(hShutter, "\r\nOPEN:1\r\n", 12, &dwSendSize, NULL);
-                    */
-
+                    
+*/
         }
         break;
     case Shutter_CLOSE:
         closeflag = FALSE;
         i = 0;
-        while (i<3) {
+        while (i < 3) {
             WriteFile(hShutter, "\r\nCLOSE:1\r\n", 13, &dwSendSize, NULL);
             Sleep(1);
             i++;
-            /*
+/*
             while (1) {
                 ReadFile(hShutter, receive, 1, &nn, 0);
                 data[i] = *receive;
@@ -875,6 +872,9 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
                             closeflag = TRUE;
                             break;
                         }
+                        else if (*receive == 'O') {
+                            break;
+                        }
                     }
                 }
                 if (closeflag == TRUE) {
@@ -885,7 +885,7 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
                 break;
             }
             WriteFile(hShutter, "\r\nCLOSE:1\r\n", 13, &dwSendSize, NULL);
-            */
+           */ 
         }
         break;    
     default:
@@ -921,6 +921,7 @@ BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,
 //シリアル通信で直接CRUXへ送信する関数
 BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equipment, const char* controll_num, const char* move) {
     char str[50] = {};
+    char crlf[4] = {};
     char receive[1];
     char data[50];
     DWORD dwSendSize = 10;
@@ -970,12 +971,21 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
         flag = FALSE;
     }    
     
-//    int i = 0;
-//    while (*receive != '\n') {
-//        ReadFile(hStage, receive, 1, &nn, 0);
-//        data[i] = *receive;
-//        i++;
-//    }
+    int i = 0;
+    while (*receive != '\n') {
+        ReadFile(hStage, receive, 1, &nn, 0);
+        //data[i] = *receive;
+        //i++;
+    }
+    *receive = 0;
+    nn = 0;
+    while (ReadFile(hStage, receive, 1, &nn, 0) == FALSE);
+    while (*receive != '\n') {
+        ReadFile(hStage, receive, 1, &nn, 0);
+    }
+    
+    //ReadFile(hStage, receive, 1, &nn, 0);    
+    //ReadFile(hStage, receive, 1, &nn, 0);
 
     return flag;
 }
