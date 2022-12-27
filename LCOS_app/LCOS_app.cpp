@@ -69,7 +69,7 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
 
 //ステージコントロールと画像表示の為の関数
 void Control_Stage_and_image(HWND hWnd, HANDLE hPort, int bitmap_num, int movement);
-BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter, DCB dcbStage, HANDLE hStage, int bitmap_num, const char* move);
+BOOL Control_Stage_and_image(HWND hWnd,int bitmap_num, const char* move);
 
 //シャッターの制御をおこなう関数
 BOOL Shutter_Controll(HANDLE hShutter,int status);
@@ -329,9 +329,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_OPEN:
             //OPENボタンを押したときの動作
-            if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3, "10000") == FALSE) {
+            if (Control_Stage_and_image(hWnd, 3, "10000") == FALSE) {
                 MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
             }
+            Sleep(500);
             if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "80000") == FALSE) {
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
@@ -345,19 +346,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
             for (int a = 0; a < 4; a++) {
-                if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3, "10000") == FALSE) {
+                if (Control_Stage_and_image(hWnd, 3, "10000") == FALSE) {
                     MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
                 }
-                if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image, "10000") == FALSE) {
+                if (Control_Stage_and_image(hWnd, 3 + Split_Image * Separate_Image, "10000") == FALSE) {
                     MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
                 }
-                if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image * 2, "10000") == FALSE) {
+                if (Control_Stage_and_image(hWnd, 3 + Split_Image * Separate_Image * 2, "10000") == FALSE) {
                     MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
                 }
-                if (Control_Stage_and_image(hWnd, dcbShutter, hShutter, dcbStage, hStage, 3 + Split_Image * Separate_Image * 3, "10000") == FALSE) {
+                if (Control_Stage_and_image(hWnd, 3 + Split_Image * Separate_Image * 3, "10000") == FALSE) {
                     MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
                 }
-            }
+            }            
+            Sleep(500);
             if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "20000") == FALSE) {
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
@@ -735,13 +737,16 @@ void Control_Stage_and_image(HWND hWnd, HANDLE hPort,int bitmap_num, int movemen
 
 }
 
-BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter,DCB dcbStage,HANDLE hStage, int bitmap_num, const char* move) {
+BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
     HBITMAP hBmp[200];
     TCHAR bmpname[] = TEXT("cubic3_10_10AA");
     HDC hdc;
     LPCSTR str = "OPEN:1\r\n";
     DWORD dwSendSize = 10;
     bool flag = TRUE;
+    unsigned long nn;
+    char receive[1];
+    char data[50];
 
     //bitmapの読み込み
     for (int i = 0; i < Split_Image; i++) {
@@ -776,9 +781,18 @@ BOOL Control_Stage_and_image(HWND hWnd, DCB dcbShutter, HANDLE hShutter,DCB dcbS
         MessageBox(hWnd, TEXT("ステージ移動ができません。"), TEXT("エラー"), MB_OK);
         flag = FALSE;
     }
-    Sleep(2);
+    
+//    int i = 0;
+//    while (*receive != '\n') {
+//        ReadFile(hStage, receive, 1, &nn, 0);
+//        data[i] = *receive;
+//        i++;
+//    }
+    Sleep(100);
     //シャッターオープン
     Shutter_Controll(hShutter, Shutter_OPEN);
+    flag = FALSE;
+    flag = TRUE;
 
     return flag;
 }
@@ -791,38 +805,89 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
     unsigned long nn;
     int i = 0;
     char str[50] = {};
-
+    bool openflag = FALSE, closeflag = FALSE;
 
     switch (status)
     {
     case Shutter_OPEN:
-        strcat_s(str, "\r\nOPEN:1\r\n");
-        while (WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL) == FALSE);
-        while (ReadFile(hShutter, receive, 1, &nn, 0) == FALSE);
-        while (WriteFile(hShutter, "\r\nOPEN?1\r\n", 12, &dwSendSize, NULL) == FALSE);
-        while (1) {
-            ReadFile(hShutter, receive, 1, &nn, 0);
-            data[i] = *receive;
+        openflag = FALSE;
+        i = 0;
+        while (i < 3) {
+            WriteFile(hShutter, "\r\nOPEN:1\r\n", 12, &dwSendSize, NULL);
+            Sleep(1);
             i++;
-            if (*receive == '\n') {
+
+/*            while (1) {
+                ReadFile(hShutter, receive, 1, &nn, 0);
+                data[i] = *receive;
+                i++;
+                //CRLFの受け取り確認はこれだと思う
+                if (*receive == '\r') {
+                    ReadFile(hShutter, receive, 1, &nn, 0);
+                    if (*receive == '\n') {
+                        break;
+                    }
+                }
+                else if (*receive == 'S') {
+                    while (1) {
+                        ReadFile(hShutter, receive, 1, &nn, 0);
+                        if (*receive == 'O') {
+                            openflag = TRUE;
+                            break;
+                        }
+                    }
+                }
+                if (openflag == TRUE) {
+                    break;
+                }
+            }
+            if (openflag == TRUE) {
                 break;
             }
+            WriteFile(hShutter, "\r\nOPEN:1\r\n", 12, &dwSendSize, NULL);
+                    */
+
         }
         break;
     case Shutter_CLOSE:
-        strcat_s(str, "\r\nCLOSE:1\r\n");
-        while (WriteFile(hShutter, str, strlen(str) + 1, &dwSendSize, NULL) == FALSE);
-        while (ReadFile(hShutter, receive, 1, &nn, 0) == FALSE);
-        while (WriteFile(hShutter, "\r\nOPEN?1\r\n", 12, &dwSendSize, NULL) == FALSE);
-        while (1) {
-            ReadFile(hShutter, receive, 1, &nn, 0);
-            data[i] = *receive;
+        closeflag = FALSE;
+        i = 0;
+        while (i<3) {
+            WriteFile(hShutter, "\r\nCLOSE:1\r\n", 13, &dwSendSize, NULL);
+            Sleep(1);
             i++;
-            if (*receive == '\n') {
+            /*
+            while (1) {
+                ReadFile(hShutter, receive, 1, &nn, 0);
+                data[i] = *receive;
+                i++;
+                //CRLFの受け取り確認はこれだと思う
+                if (*receive == '\r') {
+                    ReadFile(hShutter, receive, 1, &nn, 0);
+                    if (*receive == '\n') {
+                        break;
+                    }
+                }
+                else if (*receive == 'S') {
+                    while (1) {
+                        ReadFile(hShutter, receive, 1, &nn, 0);
+                        if (*receive == 'C') {
+                            closeflag = TRUE;
+                            break;
+                        }
+                    }
+                }
+                if (closeflag == TRUE) {
+                    break;
+                }
+            }
+            if (closeflag == TRUE) {
                 break;
             }
+            WriteFile(hShutter, "\r\nCLOSE:1\r\n", 13, &dwSendSize, NULL);
+            */
         }
-        break;
+        break;    
     default:
         flag = FALSE;
         break;
@@ -899,21 +964,19 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
         strcat_s(str, "\r\n");
     }
 
-    if (WriteFile(hPort, str, strlen(str) + 1, &dwSendSize, NULL) == FALSE) {
+    if (WriteFile(hStage, str, strlen(str) + 1, &dwSendSize, NULL) == FALSE) {
         MessageBox(hWnd, TEXT("SENDに失敗しました。"), TEXT("エラー"), MB_OK);
-        CloseHandle(hPort);
+        CloseHandle(hStage);
         flag = FALSE;
     }    
     
-    //最初の\r\nに対する応答を受け取る、必ずいります。（ほかにいい方法があれば書き直して☆）
-    int i = 0;
-    ReadFile(hPort, receive, 1, &nn, 0);
-    while (*receive != '\n') {
-        ReadFile(hPort, receive, 1, &nn, 0);
-        data[i] = *receive;
-        i++;
-    }
-    
+//    int i = 0;
+//    while (*receive != '\n') {
+//        ReadFile(hStage, receive, 1, &nn, 0);
+//        data[i] = *receive;
+//        i++;
+//    }
+
     return flag;
 }
 
