@@ -19,7 +19,7 @@
 #define MOVIE_WAIT 0
 #define HPK 1
 
-#define Split_Image 1
+#define Split_Image 2
 #define Separate_Image 16
 #define Num_Image Split_Image*Separate_Image
 
@@ -51,7 +51,7 @@ LRESULT CALLBACK WndProc2(HWND, UINT, WPARAM, LPARAM);
 //モニター情報取得関連
 HMONITOR hMonitor;
 MONITORINFOEX MonitorInfoEx;
-POINT pt = { 1921, 0 };
+POINT pt = { 1920, 0 };
 
 //BITMAPに必要な変数
 HDC hdc_men = 0;
@@ -65,7 +65,8 @@ BOOL CALLBACK SpeedcontrollDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 //回転、Xステージへの送信関数
 BOOL Send_Stage_Message(HWND hSSM,char const* equipment,char const* controll_num,char const* move);
-BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equipment, const char* controll_num, const char* move);
+BOOL Send_Stage_Message_Serial(HWND hWnd, const char* equipment, const char* controll_num, const char* move);
+BOOL Receive_Stage_Message_Serial(HWND hWnd);
 
 //ステージコントロールと画像表示の為の関数
 void Control_Stage_and_image(HWND hWnd, HANDLE hPort, int bitmap_num, int movement);
@@ -329,20 +330,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_OPEN:
             //OPENボタンを押したときの動作
-            if (Control_Stage_and_image(hWnd, 3, "10000") == FALSE) {
+            if (Control_Stage_and_image(hWnd, 3, "0") == FALSE) {
                 MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
             }
-            Sleep(500);
-            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "80000") == FALSE) {
+            /*
+            if (Send_Stage_Message_Serial(hWnd, "RPS2", "9", "80000") == FALSE) {
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
+            */
             CloseHandle(hShutter);
             CloseHandle(hStage);
             break;
         case WRITING:
             //WRITINGボタンを押したときの動作
             
-            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "0") == FALSE) {//180000で一回転
+            if (Send_Stage_Message_Serial(hWnd, "RPS2", "9", "0") == FALSE) {//180000で一回転
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
             for (int a = 0; a < 4; a++) {
@@ -359,10 +361,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
                 }
             }            
-            Sleep(500);
-            if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", "20000") == FALSE) {
+            if (Send_Stage_Message_Serial(hWnd, "RPS2", "9", "20000") == FALSE) {
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
+            while (Receive_Stage_Message_Serial(hWnd) == FALSE);
 
             drawing = MOVIE_END;
             SendMessage(hWnd, WM_PAINT, NULL, NULL);
@@ -498,7 +500,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         //START，END，HPK画像の読み込み
         hdc = GetDC(hWnd);
-        hBmp[0] = LoadBitmap(hInst, TEXT("CHECKER2"));
+        hBmp[0] = LoadBitmap(hInst, TEXT("WHITE"));
         hdc_men_array[0] = CreateCompatibleDC(hdc);
         SelectObject(hdc_men_array[0], hBmp[0]);
 
@@ -551,12 +553,12 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
         else if(LOWORD(wp) == ALIGNMENT_OK_BUTTON){
             num = GetDlgItemInt(hDlog, ALIGNMENT_EDIT, success, TRUE);
             sprintf_s(numchar, strlen(numchar) + 1, "%d", num);
-            if (Send_Stage_Message_Serial(hDlog, dcbStage, hStage, "RPS1", "9", numchar /*"16400"*/) == FALSE) {
+            if (Send_Stage_Message_Serial(hDlog, "RPS1", "9", numchar /*"16400"*/) == FALSE) {
                 MessageBox(hDlog, TEXT("シリアル送信エラーです"), TEXT("エラー"), MB_OK);
             }
         }
         else if (LOWORD(wp) == ALIGNMENT_INI) {
-            if (Send_Stage_Message_Serial(hDlog, dcbStage, hStage, "ORG1", "9", "0") == FALSE) {
+            if (Send_Stage_Message_Serial(hDlog, "ORG1", "9", "0") == FALSE) {
                 MessageBox(hDlog, TEXT("シリアル送信エラーです"), TEXT("エラー"), MB_OK);
             }
         }
@@ -591,6 +593,7 @@ BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
         }
         else if (LOWORD(wp) == SPEEDCON_READING_BUTTON) {
             int j = 0;
+            //データ送信部
             char equipment[5] = {};
             char numchar[2], tablechar[2], data[50],receive[1];
             char* end1 = 0, * end2 = 0, * end3 = 0, * end4 = 0, * end5 = 0;
@@ -598,7 +601,8 @@ BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
             sprintf_s(numchar, 2, "%d", GetDlgItemInt(hDlog, SPEEDCON_NUM_EDIT, success, FALSE));
             strcat_s(equipment, numchar);
             sprintf_s(tablechar, 2, "%d", GetDlgItemInt(hDlog, SPEEDCON_TABLE_EDIT, success, FALSE));
-            Send_Stage_Message_Serial(hDlog, dcbStage, hStage, equipment, tablechar, FALSE);
+            Send_Stage_Message_Serial(hDlog, equipment, tablechar, FALSE);
+            //データ受信部
             while (1) {
                 ReadFile(hStage, receive, 1, &nn, 0);
                 if (*receive == 'C') {
@@ -638,6 +642,7 @@ BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
             break;
         }
         else if (LOWORD(wp) == SPEEDCON_WRITING_BUTTON) {
+            //データ送信部
             char num[5] = {};
             char move[50] = {};
             char numchar[2], tablechar[2],startchar[7],maxchar[7],accelltimechar[3],accellmodechar[2], receive[1];
@@ -656,7 +661,7 @@ BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
             strcat_s(move, "/");
             sprintf_s(accellmodechar, 2, "%d", GetDlgItemInt(hDlog, SPEEDCON_ACCELLMODE_EDIT, success, FALSE));
             strcat_s(move, accellmodechar);
-            Send_Stage_Message_Serial(hDlog, dcbStage, hStage, num, tablechar, move);
+            Send_Stage_Message_Serial(hDlog,  num, tablechar, move);
             
             while (1) {
                 ReadFile(hStage, receive, 1, &nn, 0);
@@ -748,11 +753,21 @@ BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
     char receive[1];
     char data[100];
 
+    //シャッターのクローズ
+    Shutter_Controll(hShutter, Shutter_CLOSE);
+
+    //ステージの移動
+    if (Send_Stage_Message_Serial(hWnd, "RPS2", "9", move) == FALSE) {
+        MessageBox(hWnd, TEXT("ステージ移動ができません。"), TEXT("エラー"), MB_OK);
+        flag = FALSE;
+    }
+
+
     //bitmapの読み込み
     for (int i = 0; i < Split_Image; i++) {
         for (int m = 0; m < Separate_Image; m++) {
             hdc = GetDC(hWnd);
-            wsprintf(bmpname, TEXT("AIDB_BITMAP%d"), bitmap_num + m + i * Separate_Image);//TEXT("MOVIE1_%d_%d"), i, m);
+            wsprintf(bmpname, TEXT("BIDB_BITMAP%d"), bitmap_num + m + i * Separate_Image);//TEXT("MOVIE1_%d_%d"), i, m);
             int imagenum = MOVIE_START + Separate_Image * i + m;
             hBmp[imagenum] = LoadBitmap(hInst, bmpname);
             hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
@@ -760,33 +775,23 @@ BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
             ReleaseDC(hWnd, hdc);
         }
     }
-    //Sleep(1000);
 
+    while (Receive_Stage_Message_Serial(hWnd) == FALSE);
+
+    //シャッターオープン
+    Shutter_Controll(hShutter, Shutter_OPEN);
+    Sleep(100);
     //ビットマップの再生
     for (int i = MOVIE_START; i < MOVIE_START + Split_Image * Separate_Image; i++) {
         hWnd = FindWindow(NULL, TEXT("BmpWindow"));
         drawing = i;
         SendMessage(hWnd, WM_PAINT, NULL, NULL);
-        Sleep(40);
+        Sleep(20);
     }
 
     drawing = MOVIE_WAIT;
     SendMessage(hWnd, WM_PAINT, NULL, NULL);
-    
-    //シャッターのクローズ
-    Shutter_Controll(hShutter, Shutter_CLOSE);
-
-    //ステージの移動
-    if (Send_Stage_Message_Serial(hWnd, dcbStage, hStage, "RPS2", "9", move) == FALSE) {
-        MessageBox(hWnd, TEXT("ステージ移動ができません。"), TEXT("エラー"), MB_OK);
-        flag = FALSE;
-    }
-    
-//    Sleep(200);
-    //シャッターオープン
-    Shutter_Controll(hShutter, Shutter_OPEN);
-    flag = FALSE;
-    flag = TRUE;
+    Sleep(100);
 
     return flag;
 }
@@ -808,42 +813,7 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
         i = 0;
         while (i < 3) {
             WriteFile(hShutter, "\r\nOPEN:1\r\n", 12, &dwSendSize, NULL);
-            Sleep(1);
             i++;
-/*
-            while (1) {
-                ReadFile(hShutter, receive, 1, &nn, 0);
-                data[i] = *receive;
-                i++;
-                //CRLFの受け取り確認はこれだと思う
-                if (*receive == '\r') {
-                    ReadFile(hShutter, receive, 1, &nn, 0);
-                    if (*receive == '\n') {
-                        break;
-                    }
-                }
-                else if (*receive == 'S') {
-                    while (1) {
-                        ReadFile(hShutter, receive, 1, &nn, 0);
-                        if (*receive == 'O') {
-                            openflag = TRUE;
-                            break;
-                        }
-                        else if (*receive == 'C') {
-                            break;
-                        }
-                    }
-                }
-                if (openflag == TRUE) {
-                    break;
-                }
-            }
-            if (openflag == TRUE) {
-                break;
-            }
-            WriteFile(hShutter, "\r\nOPEN:1\r\n", 12, &dwSendSize, NULL);
-                    
-*/
         }
         break;
     case Shutter_CLOSE:
@@ -851,41 +821,7 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
         i = 0;
         while (i < 3) {
             WriteFile(hShutter, "\r\nCLOSE:1\r\n", 13, &dwSendSize, NULL);
-            Sleep(1);
             i++;
-/*
-            while (1) {
-                ReadFile(hShutter, receive, 1, &nn, 0);
-                data[i] = *receive;
-                i++;
-                //CRLFの受け取り確認はこれだと思う
-                if (*receive == '\r') {
-                    ReadFile(hShutter, receive, 1, &nn, 0);
-                    if (*receive == '\n') {
-                        break;
-                    }
-                }
-                else if (*receive == 'S') {
-                    while (1) {
-                        ReadFile(hShutter, receive, 1, &nn, 0);
-                        if (*receive == 'C') {
-                            closeflag = TRUE;
-                            break;
-                        }
-                        else if (*receive == 'O') {
-                            break;
-                        }
-                    }
-                }
-                if (closeflag == TRUE) {
-                    break;
-                }
-            }
-            if (closeflag == TRUE) {
-                break;
-            }
-            WriteFile(hShutter, "\r\nCLOSE:1\r\n", 13, &dwSendSize, NULL);
-           */ 
         }
         break;    
     default:
@@ -919,7 +855,7 @@ BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,
 }
 
 //シリアル通信で直接CRUXへ送信する関数
-BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equipment, const char* controll_num, const char* move) {
+BOOL Send_Stage_Message_Serial(HWND hWnd, const char* equipment, const char* controll_num, const char* move) {
     char str[50] = {};
     char crlf[4] = {};
     char receive[1];
@@ -971,23 +907,35 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, DCB dcb, HANDLE hPort, const char* equ
         flag = FALSE;
     }    
     
+    //一番最初に送ったcrlf信号を拾っている。
     int i = 0;
     while (*receive != '\n') {
         ReadFile(hStage, receive, 1, &nn, 0);
         //data[i] = *receive;
         //i++;
     }
+
+//    *receive = 0;
+//    nn = 0;
+//    while (ReadFile(hStage, receive, 1, &nn, 0) == FALSE);
+//    while (*receive != '\n') {
+//       ReadFile(hStage, receive, 1, &nn, 0);
+ //   }
+    return flag;
+}
+
+BOOL Receive_Stage_Message_Serial(HWND hWnd) {
+    char receive[1];
+    unsigned long nn;
+
     *receive = 0;
     nn = 0;
     while (ReadFile(hStage, receive, 1, &nn, 0) == FALSE);
     while (*receive != '\n') {
-        ReadFile(hStage, receive, 1, &nn, 0);
+       ReadFile(hStage, receive, 1, &nn, 0);
     }
-    
-    //ReadFile(hStage, receive, 1, &nn, 0);    
-    //ReadFile(hStage, receive, 1, &nn, 0);
 
-    return flag;
+    return TRUE;
 }
 
 // バージョン情報ボックスのメッセージ ハンドラーです。
