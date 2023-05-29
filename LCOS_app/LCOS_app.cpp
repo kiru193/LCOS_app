@@ -1,5 +1,29 @@
-﻿// LCOS_app.cpp : アプリケーションのエントリ ポイントを定義します。
-//
+﻿/*
+少し昔のものであるので，今のものと少し違う可能性があります，
+ただ，自作関数とかはある程度同じであるためコメントをある程度書きます．
+このプログラミングコードはWin32apiで検索してもらうとある程度情報が出てきます．
+できればリソースファイル(.rc)とRecource.hファイル辺りの理解も必要なのでできれば以下の参考書籍を読んでほしい．
+参考書籍は以下のものです（大学の図書館にもあります）
+https://item.rakuten.co.jp/bookoffonline/0016869437/
+猫でもわかるＷｉｎｄｏｗｓプログラミング　第４版／粂井康孝【著】 【中古】afb
+ある程度上記の参考書を読めば，後はネットからの情報でこのプログラムで大切な部分は見えてくるかと…
+やっていることを以下に列挙します．
+・基本的なwindowsアプリケーションの作製．（ボタンを配置する方法や，上部バーへの要素の追加，ダイアログボックスの生成と作り方など）
+・画像を連続してアプリケーションウィンドへ表示
+・シリアル通信
+また，必要のない関数や変数を削除し，ある程度効率化しています．
+シャッターとステージの情報は論文に書いてあるのでユーザーマニュアルを必ず読んでください．ネットでダウンロードできます．
+2023/05/29 sena yamagishi
+
+このプログラムの問題点
+かなり動作が不安定，主にシリアル通信回りの問題を抱えている．
+具体的には，シリアル通信が想定通りの処理をしない，自分の想定している信号を出さない，など．
+推測としては，ゆっくり一つ一つデバッグすると正しく動作するので，受け取り側と送り側の同期のようなものが取れていないと考えている
+（そのため，無駄にsleep関数や繰り返し文などで時間稼ぎをしているところがたまにある．）
+シャッターの動作が不安定，これはハード面なのかソフト面の問題の二つある．
+ハード面としては，たまに電磁石が磁気を持ってしまい動かなくなるので手を用いて強引に開けたり閉じたりするとよい．
+ソフト面としては，先のシリアル通信の想定通りの通信が問題だと思われる．なぜかシリアル通信のデータが貯まってしまい，一つ前のデータが送られるとかありがち
+*/
 
 #include "framework.h"
 #include "LCOS_app.h"
@@ -10,24 +34,23 @@
 #include <process.h>
 #include <iostream>
 
+//window表示に必要な定義
 #define MAX_LOADSTRING 100
 #define WINDOW_WIDE 400
 #define WINDOW_HIGH 200
 
+//movieの為に必要な定義
 #define MOVIE_START 2
 #define MOVIE_END 0
 #define MOVIE_WAIT 0
 #define HPK 1
 
+//等分数と分割数
 #define Split_Image 2
 #define Separate_Image 16
 #define Num_Image Split_Image*Separate_Image
 
-#define X_Forward 1
-#define X_Backward 2
-#define Rotate_Forward 3
-#define Rotate_Backward 4
-
+//シャッターを動かすための定義
 #define Shutter_OPEN 1
 #define Shutter_CLOSE 0
 
@@ -64,7 +87,6 @@ BOOL CALLBACK AlignmentDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK SpeedcontrollDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 //回転、Xステージへの送信関数
-BOOL Send_Stage_Message(HWND hSSM,char const* equipment,char const* controll_num,char const* move);
 BOOL Send_Stage_Message_Serial(HWND hWnd, const char* equipment, const char* controll_num, const char* move);
 BOOL Receive_Stage_Message_Serial(HWND hWnd);
 
@@ -86,8 +108,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: ここにコードを挿入してください。
 
     // グローバル文字列を初期化する
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -123,11 +143,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
-//
-//  関数: MyRegisterClass()
-//
-//  目的: ウィンドウ クラスを登録します。
-//
+//一つ目のウィンドに関しての情報
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -149,7 +165,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//二つ目のウィンドクラスの登録
+//二つ目のウィンドについての情報
 ATOM BitMapClass(HINSTANCE hInstance) {
     WNDCLASSEXW wcex;
 
@@ -238,27 +254,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
     HDC hdc;
     static HWND hSend, hShow, hWrintig, hSpeedcon, hReset;
-    static HWND hShow2;
-
-    HBITMAP hBmp[200];
-    TCHAR bmpname[] = TEXT("cubic3_10_10AA");
-
-    WCHAR szBuff[1024];
-    char const *eq = "RPS1", *con = "0", *move = "10000000";
-
-    const char* str = "OPEN:1\r\n";
-    DWORD dwSendSize = 10;
-    COMSTAT Comstat;
-
-    bool start = TRUE;
-
-    unsigned char Set_moving_stage[] = {
-        X_Forward,
-        Rotate_Forward,
-        X_Backward,
-        Rotate_Forward
-    };
-    int count = 0;
 
     switch (message)
     {
@@ -302,20 +297,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetCommState(hStage, &dcbStage);
 
         int wmId = LOWORD(wParam);
+        //弄るのはこのswitch文の中身，caseは各ボタンを押したとき，または何某らの動作が行われたときの処理である．
         // 選択されたメニューの解析:
         switch (wmId)
         {
         case IDM_ABOUT:
+            //ヘルプ→バージョン確認ボタンを押したときの動作
+            //ダイアログボックスの表示
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
             break;
 
         case IDM_EXIT:
+            //ファイル→終了ボタンを押したときの動作
             DestroyWindow(hWnd);
             break;
 
         case ID_ALIGNMENT:
             //ALIGNMENTボタンを押したときの動作
-            //Dialogでの処理
+            //ダイアログを表示し数値を代入できるようにする
             DialogBox(hInst, MAKEINTRESOURCE(ALIGNMENT_DAILOG), hWnd, (DLGPROC)AlignmentDlgProc);
             
             CloseHandle(hShutter);
@@ -324,30 +323,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case ID_SHOW:
             //SHOWボタンを押したときの動作
+            //HPKを表示できるCGHを表示
             hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-            drawing = HPK;
-            SendMessage(hWnd, WM_PAINT, NULL, NULL);
+            drawing = HPK;//どの画像を表示するのか
+            SendMessage(hWnd, WM_PAINT, NULL, NULL);//SendMessage関数は第二画面に対して指令をだす（この場合第二画面を更新するように命令する）
             break;
         case ID_OPEN:
             //OPENボタンを押したときの動作
-            if (Control_Stage_and_image(hWnd, 3, "0") == FALSE) {
-                MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
-            }
-            /*
-            if (Send_Stage_Message_Serial(hWnd, "RPS2", "9", "80000") == FALSE) {
-                MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
-            }
-            */
+            //シャッターを開けて，5秒後に閉じる動作
+            Shutter_Controll(hShutter, Shutter_OPEN);
+            Sleep(5000);
+            Shutter_Controll(hShutter, Shutter_CLOSE);
             CloseHandle(hShutter);
             CloseHandle(hStage);
             break;
         case WRITING:
             //WRITINGボタンを押したときの動作
-            
-            if (Send_Stage_Message_Serial(hWnd, "RPS2", "9", "0") == FALSE) {//180000で一回転
+            //初期位置の設定（この場合"0"つまり動かさない）
+            if (Send_Stage_Message_Serial(hWnd, "RPS2", "9", "0") == FALSE) {
                 MessageBox(hWnd, TEXT("送信に失敗しました。"), TEXT("エラー"), MB_OK);
             }
+            //ステージと画像の再生制御
             for (int a = 0; a < 4; a++) {
+                //Control_stage_and_imageの3は固定値，一つ目のif文は3番目の画像からスタートする，という意味である．
+                //"10000"は移動量，10000pls分の回転を行う（180000が半回転）
                 if (Control_Stage_and_image(hWnd, 3, "10000") == FALSE) {
                     MessageBox(hWnd, TEXT("コントロールステージエラーです。"), TEXT("エラー"), MB_OK);
                 }
@@ -373,65 +372,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             CloseHandle(hStage);
             break;
 
-        case ID_RESET:
-            hWnd = FindWindow(NULL, TEXT("Chamonix"));
-            if (hWnd != 0) {
-                eq = "RPS2";//RPS"2"この2が動作させる機器の番号に対応する。（CharmonixやCRUXを見ればどちらが何番かがわかるはず。）
-                con = "0";//Charmonix内のSystemに保存されている速度テーブルの選択番号
-                //以下番号要約
-                //0：タイリング法における最適値（とりあえず）
-                //1～8:予約（必要になり次第、登録すること）
-                //9：自由に変えてよい値、テスト、試験用
-                move = "90000";//これで半回転　入力可能な値は5桁の数字まで、6桁の数字を入力すると一の位が省略された数字が入力されたと判断され動作する。
-                Send_Stage_Message(hWnd, eq, con, move);
-                while (Send_Stage_Message == 0);
-                Send_Stage_Message(hWnd, "RPS2", "9", "900");
-                while (Send_Stage_Message == 0);
-            }
-            else {
-                MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-            }
-            break;
-
-
-            for (int i = 0; i < sizeof(Set_moving_stage) / sizeof(unsigned char); i++) {
-                hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-                drawing = MOVIE_WAIT;
-                SendMessage(hWnd, WM_PAINT, NULL, NULL);
-                hWnd = FindWindow(NULL, TEXT("Chamonix"));
-                if (hWnd != 0) {
-                    switch (Set_moving_stage[i])
-                    {
-                    case X_Backward:
-                        Send_Stage_Message(hWnd, "RPS1", "9", "5875");
-                        while (Send_Stage_Message == 0);
-                        Sleep(700);
-                        break;
-                    case X_Forward:
-                        Send_Stage_Message(hWnd, "RPS1", "9", "-5875");
-                        while (Send_Stage_Message == 0);
-                        Sleep(700);
-                        break;
-                    case Rotate_Backward:
-                        Send_Stage_Message(hWnd, "RPS2", "9", "-1000");
-                        while (Send_Stage_Message == 0);
-                        Sleep(700);
-                        break;
-                    case Rotate_Forward:
-                        Send_Stage_Message(hWnd, "RPS2", "9", "1000");
-                        while (Send_Stage_Message == 0);
-                        Sleep(700);
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                else {
-                    MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-                }
-            }
         case ID_SPEED_CON:
-            //Dialogでの処理
+            //SPEED CONボタンを押したときの動作
+            //ダイアログを用いた処理，出てきたboxに適切なパラメータを投入
             DialogBox(hInst, MAKEINTRESOURCE(SPEEDCON_DIALOG), hWnd, (DLGPROC)SpeedcontrollDlgProc);
 
             CloseHandle(hShutter);
@@ -444,6 +387,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     
         break;
     case WM_CREATE:
+        //ボタン自体の生成
         hSend = CreateWindow(TEXT("BUTTON"), TEXT("ALIGNMENT"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_ALIGNMENT, hInst, NULL);
         hShow = CreateWindow(TEXT("BUTTON"), TEXT("SHOW HPK"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_SHOW, hInst, NULL);
         hShutter = CreateWindow(TEXT("BUTTON"), TEXT("OPEN"), WS_CHILD | WS_VISIBLE, 10, 90, 100, 30, hWnd, (HMENU)ID_OPEN, hInst, NULL);
@@ -453,8 +397,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
+            //特にやっていることはない
             hdc = BeginPaint(hWnd, &ps);
-            // TODO: HDC を使用する描画コードをここに追加してください...
             EndPaint(hWnd, &ps);
         }
         break;
@@ -468,6 +412,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 //二つ目のウィンドウのCallBack
+//二つ目のウィンドウとは，CGHが実際に表示されるところのこと
 LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     int wmId, wmEvent;
     PAINTSTRUCT ps;
@@ -500,11 +445,11 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         //START，END，HPK画像の読み込み
         hdc = GetDC(hWnd);
-        hBmp[0] = LoadBitmap(hInst, TEXT("WHITE"));
+        hBmp[0] = LoadBitmap(hInst, TEXT("WHITE"));//hBmpの0番にCGHとして全照射する"白"を格納
         hdc_men_array[0] = CreateCompatibleDC(hdc);
         SelectObject(hdc_men_array[0], hBmp[0]);
 
-        hBmp[1] = LoadBitmap(hInst, TEXT("HPK"));
+        hBmp[1] = LoadBitmap(hInst, TEXT("HPK"));//hBmpの1番にCGHとして何も照射しない"黒"を格納
         hdc_men_array[1] = CreateCompatibleDC(hdc);
         SelectObject(hdc_men_array[1], hBmp[1]);
         ReleaseDC(hWnd, hdc);
@@ -514,12 +459,14 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         w = bmp_info.bmWidth;
         h = bmp_info.bmHeight;
         break;
+
     case WM_PAINT:
         //第二画面にてビットマップを表示させるプログラム
-        InvalidateRect(hWnd, NULL, TRUE);//←これ必須
+        InvalidateRect(hWnd, NULL, TRUE);//←これ必須，透明な四角形を表示することで何某らのアクションをPC側に認識させ，画面を更新させる
         hdc = BeginPaint(hWnd, &ps);
         hdc_men = hdc_men_array[drawing];
         BitBlt(hdc, (MonitorInfoEx.rcMonitor.right - MonitorInfoEx.rcMonitor.left) / 2 - w / 2, (MonitorInfoEx.rcMonitor.bottom - MonitorInfoEx.rcMonitor.top) / 2 - h / 2, w, h, hdc_men, 0, 0, SRCCOPY);
+        //↑実際に表示する画像
         EndPaint(hWnd, &ps);
         break;
     case WM_DESTROY:
@@ -542,7 +489,7 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg)
     {
     case WM_INITDIALOG:
-        SetDlgItemInt(hDlog, ALIGNMENT_EDIT, -16400, TRUE);
+        SetDlgItemInt(hDlog, ALIGNMENT_EDIT, -16400, TRUE);//-16400は初期値，この辺の値であれば書き込みができるはず…
         break;
     case WM_COMMAND:
         if (LOWORD(wp) == ALIGNMENT_CANCEL_BUTTON)
@@ -573,6 +520,8 @@ BOOL CALLBACK AlignmentDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
 }
 
 //スピードコントロールダイアログボックス
+//ステージのスピードや，加速度，その他のパラメータを書き込むプログラム，詳しくはKOHZUのCRUXユーザーマニュアルを参照
+//これ未完成です．最初に述べたシリアル通信の動作問題で適切に書き込むことが難しいです…．（完成させてくれてもええんやで）
 BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
     BOOL* success = 0;
     unsigned long nn;
@@ -685,73 +634,12 @@ BOOL CALLBACK SpeedcontrollDlgProc(HWND hDlog, UINT msg, WPARAM wp, LPARAM lp) {
     return FALSE;
 }
 
-//ステージコントロールと画像表示の為の関数
-void Control_Stage_and_image(HWND hWnd, HANDLE hPort,int bitmap_num, int movement) {
-    HBITMAP hBmp[200];
-    TCHAR bmpname[] = TEXT("cubic3_10_10AA");
-    HDC hdc;
-    char move[10];
-    BOOL Ret;
-    LPCSTR str = "OPEN:1\r\n";
-    DWORD dwSendSize = 10;
-
-    //bitmapの読み込み
-    for (int i = 0; i < Split_Image; i++) {
-        for (int m = 0; m < Separate_Image; m++) {
-            hdc = GetDC(hWnd);
-            wsprintf(bmpname, TEXT("IDB_BITMAP%d"), bitmap_num + m + i * Separate_Image);//TEXT("MOVIE1_%d_%d"), i, m);
-            int imagenum = MOVIE_START + Separate_Image * i + m;
-            hBmp[imagenum] = LoadBitmap(hInst, bmpname);
-            hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
-            SelectObject(hdc_men_array[imagenum], hBmp[imagenum]);
-            ReleaseDC(hWnd, hdc);
-        }
-    }
-    Sleep(1000);
-
-    //ビットマップの再生
-    for (int i = MOVIE_START; i < MOVIE_START + Split_Image * Separate_Image; i++) {
-        hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-        drawing = i;
-        SendMessage(hWnd, WM_PAINT, NULL, NULL);
-        Sleep(40);
-    }
-
-    drawing = MOVIE_WAIT;
-    SendMessage(hWnd, WM_PAINT, NULL, NULL);
-
-    //シャッターのクローズ
-    str = "\r\nCLOSE:1\r\n";
-    Ret = WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL);
-
-    //ステージのコントロール    
-    hWnd = FindWindow(NULL, TEXT("Chamonix"));
-    if (hWnd != 0) {
-        snprintf(move, 10, "%d", movement);
-        Send_Stage_Message(hWnd, "RPS2", "9", move);
-        while (Send_Stage_Message == 0);
-    }
-    else {
-        MessageBox(hWnd, TEXT("Chamonixが開かれていません"), TEXT("エラー"), MB_OK);
-    }
-    
-    //シャッターオープン
-    Sleep(2000);
-    str = "\r\nOPEN:1\r\n";
-    Ret = WriteFile(hPort, str, strlen(str)+1, &dwSendSize, NULL);
-
-}
-
+//ステージのコントロールと画像の制御を行うプログラム（ここも大事）
 BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
     HBITMAP hBmp[200];
     TCHAR bmpname[] = TEXT("cubic3_10_10AA");
     HDC hdc;
-    LPCSTR str = "OPEN:1\r\n";
-    DWORD dwSendSize = 10;
     bool flag = TRUE;
-    unsigned long nn;
-    char receive[1];
-    char data[100];
 
     //シャッターのクローズ
     Shutter_Controll(hShutter, Shutter_CLOSE);
@@ -762,15 +650,16 @@ BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
         flag = FALSE;
     }
 
-
     //bitmapの読み込み
+    //bitmapを指定された配列の番号から投入していく，Split_image，Separate_imageはこのプログラムの一番最初に定義されている．
     for (int i = 0; i < Split_Image; i++) {
         for (int m = 0; m < Separate_Image; m++) {
             hdc = GetDC(hWnd);
             wsprintf(bmpname, TEXT("BIDB_BITMAP%d"), bitmap_num + m + i * Separate_Image);//TEXT("MOVIE1_%d_%d"), i, m);
+            //↑bitmapの名前が数字ごとになっているため，これを名付けている．
             int imagenum = MOVIE_START + Separate_Image * i + m;
             hBmp[imagenum] = LoadBitmap(hInst, bmpname);
-            hdc_men_array[imagenum] = CreateCompatibleDC(hdc);
+            hdc_men_array[imagenum] = CreateCompatibleDC(hdc);//hdc_men_arrayはグローバル変数であるので，二つ目のウィンドウのWM_PAINT内にいる物と同じ
             SelectObject(hdc_men_array[imagenum], hBmp[imagenum]);
             ReleaseDC(hWnd, hdc);
         }
@@ -781,12 +670,13 @@ BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
     //シャッターオープン
     Shutter_Controll(hShutter, Shutter_OPEN);
     Sleep(100);
+
     //ビットマップの再生
     for (int i = MOVIE_START; i < MOVIE_START + Split_Image * Separate_Image; i++) {
         hWnd = FindWindow(NULL, TEXT("BmpWindow"));
-        drawing = i;
-        SendMessage(hWnd, WM_PAINT, NULL, NULL);
-        Sleep(20);
+        drawing = i;//drawingはグローバル変数であるので，二つ目のウィンドウへi番目の画像を送れと命令している．
+        SendMessage(hWnd, WM_PAINT, NULL, NULL);//二つ目のウィンドウのWM_PAINTを実行せよという命令
+        Sleep(20);//ここで画像一枚当たりの再生速度を決定している．20ms待って次の画像を表示するため，50Hzの画像再生が行われる．
     }
 
     drawing = MOVIE_WAIT;
@@ -796,14 +686,13 @@ BOOL Control_Stage_and_image(HWND hWnd, int bitmap_num, const char* move) {
     return flag;
 }
 //シャッターのコントロールに関する関数
+//ソフト的にもハード的にもかなり不安定部分
+//実際に閉じているか開いているかを聞いて返す関数もあるがそれがたまに間違ったりする（っぽい）ということもあり対策を求む
 BOOL Shutter_Controll(HANDLE hShutter, int status) {
-    char receive[1];
     char data[50];
     DWORD dwSendSize = 10;
     bool flag = TRUE;
-    unsigned long nn;
     int i = 0;
-    char str[50] = {};
     bool openflag = FALSE, closeflag = FALSE;
 
     switch (status)
@@ -811,6 +700,7 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
     case Shutter_OPEN:
         openflag = FALSE;
         i = 0;
+        //以下一方的にシャッターへ信号を送ることができるため，3回同じ信号を送っている（意味があるかは不明）
         while (i < 3) {
             WriteFile(hShutter, "\r\nOPEN:1\r\n", 12, &dwSendSize, NULL);
             i++;
@@ -828,33 +718,11 @@ BOOL Shutter_Controll(HANDLE hShutter, int status) {
         flag = FALSE;
         break;
     }
-    printf("%s", data);
-
     return flag;
 }
 
-//Chamonixへ送信する関数
-BOOL Send_Stage_Message(HWND hSSM,char const *equipment,char const*controll_num,char const *move) {
-    COPYDATASTRUCT* SendData = new COPYDATASTRUCT();
-    WPARAM ReceveData = 0;
-    char Send_Contents[50] = {};
-    char Slash[] = "/";
-
-    strcat_s(Send_Contents, equipment);
-    strcat_s(Send_Contents, Slash);
-    strcat_s(Send_Contents, controll_num);
-    strcat_s(Send_Contents, Slash);
-    strcat_s(Send_Contents, move);
-
-    SendData->dwData = (intptr_t)0;
-    SendData->cbData = (UINT)12;
-    SendData->lpData = (PVOID)Send_Contents;
-
-    SendMessage(hSSM, WM_COPYDATA, ReceveData, (LPARAM)SendData);
-    return (BOOL)SendMessage;
-}
-
 //シリアル通信で直接CRUXへ送信する関数
+//CRUX内固有のコマンドを生成し送信するための関数であるため，必ずCRUXのユーザーマニュアルを見るように
 BOOL Send_Stage_Message_Serial(HWND hWnd, const char* equipment, const char* controll_num, const char* move) {
     char str[50] = {};
     char crlf[4] = {};
@@ -864,18 +732,21 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, const char* equipment, const char* con
     bool flag=TRUE;
     unsigned long nn;
 
-    if (equipment[0] == 'R' && equipment[1] == 'P' && equipment[2] == 'S') {
-        strcat_s(str, "\r\n\x02");
-        strcat_s(str, equipment);
+    if (equipment[0] == 'R' && equipment[1] == 'P' && equipment[2] == 'S') {//←多分この書き方はもう少し何とかなる．
+        //RPSは相対量の移動を命令するコマンド
+        //これがこのプログラムにおいて最も使われるコマンド
+        strcat_s(str, "\r\n\x02");//ASCIIコードの0x02はSTX信号といい，通信開始を示すコードである．
+        strcat_s(str, equipment);//動作させるステージ番号の指定
         strcat_s(str, "/");
-        strcat_s(str, controll_num);
+        strcat_s(str, controll_num);//動作させるステージを動かすための速度テーブルの番号を指定
         strcat_s(str, "/");
-        strcat_s(str, move);
+        strcat_s(str, move);//動作量を指定
         strcat_s(str, "/");
         strcat_s(str, "0");
         strcat_s(str, "\r\n");
     }
     else if (equipment[0] == 'O' && equipment[1] == 'R' && equipment[2] == 'G') {
+        //ORGは初期位置へ戻すためのコマンド
         strcat_s(str, "\r\n\x02");
         strcat_s(str, equipment);
         strcat_s(str, "/");
@@ -885,6 +756,7 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, const char* equipment, const char* con
         strcat_s(str, "\r\n");
     }
     else if (equipment[0] == 'R' && equipment[1] == 'T' && equipment[2] == 'B') {
+        //RTBは速度テーブルの値を読み出すためのコマンド
         strcat_s(str, "\r\n\x02");
         strcat_s(str, equipment);
         strcat_s(str, "/");
@@ -892,6 +764,7 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, const char* equipment, const char* con
         strcat_s(str, "\r\n");
     }
     else if (equipment[0] == 'W' && equipment[1] == 'T' && equipment[2] == 'B') {
+        //WTBは速度テーブルの値を書き込むためのコマンド
         strcat_s(str, "\r\n\x02");
         strcat_s(str, equipment);
         strcat_s(str, "/");
@@ -911,19 +784,12 @@ BOOL Send_Stage_Message_Serial(HWND hWnd, const char* equipment, const char* con
     int i = 0;
     while (*receive != '\n') {
         ReadFile(hStage, receive, 1, &nn, 0);
-        //data[i] = *receive;
-        //i++;
+        //シリアル通信の返信を格納している，どの返答が帰ってきているかのデバッグ及び確認用．
     }
-
-//    *receive = 0;
-//    nn = 0;
-//    while (ReadFile(hStage, receive, 1, &nn, 0) == FALSE);
-//    while (*receive != '\n') {
-//       ReadFile(hStage, receive, 1, &nn, 0);
- //   }
     return flag;
 }
 
+//受け取りメッセージの解析（未完成）デバッグモードで満足したためあまり使わなかったのよ
 BOOL Receive_Stage_Message_Serial(HWND hWnd) {
     char receive[1];
     unsigned long nn;
